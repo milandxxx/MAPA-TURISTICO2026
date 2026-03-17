@@ -2,219 +2,203 @@
   <div class="map-page">
     <Navbar />
     <div id="map" class="map-container"></div>
-
-    <div v-if="isAdmin" class="admin-panel">
-      <h3>Panel de administración</h3>
-      <form @submit.prevent="agregarLugar">
-        <input v-model="nuevoLugar.nombre" placeholder="Nombre" required />
-        <input v-model="nuevoLugar.info" placeholder="Descripción" required />
-        <input v-model="nuevoLugar.img" placeholder="URL Imagen" required />
-        <input v-model.number="nuevoLugar.lng" placeholder="Longitud (ej: -74.210)" type="number" step="any" required />
-        <input v-model.number="nuevoLugar.lat" placeholder="Latitud (ej: 11.243)" type="number" step="any" required />
-        <button type="submit">Agregar lugar</button>
-      </form>
-      <button class="btn-logout" @click="cerrarSesion">Cerrar sesión</button>
-    </div>
+    <div id="popup" class="ol-popup"></div>
   </div>
 </template>
 
 <script>
-import maplibregl from 'maplibre-gl'
-import Navbar from '../components/Navbar.vue'
-import { lugares } from '../data/lugares.js'
-import { auth } from '../auth/auth.js'
+import 'ol/ol.css'
+import Navbar from "../components/Navbar.vue"
+import Map from 'ol/Map'
+import View from 'ol/View'
+import TileLayer from 'ol/layer/Tile'
+import OSM from 'ol/source/OSM'
+import { fromLonLat } from 'ol/proj'
+import Feature from 'ol/Feature'
+import Point from 'ol/geom/Point'
+import VectorLayer from 'ol/layer/Vector'
+import VectorSource from 'ol/source/Vector'
+import Cluster from 'ol/source/Cluster'
+import { Icon, Style, Text, Fill, Stroke } from 'ol/style'
+import Overlay from 'ol/Overlay'
 
 export default {
-  name: 'MapView',
+  name: "MapView",
   components: { Navbar },
-  data() {
-    return {
-      isAdmin: auth.isAdmin(),
-      map: null,
-      // Copia local para poder agregar lugares temporales sin mutar la fuente de datos
-      lugaresLocales: [...lugares],
-      nuevoLugar: { nombre: '', info: '', img: '', lng: null, lat: null }
-    }
-  },
   mounted() {
-    this.map = new maplibregl.Map({
-      container: 'map',
-      style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-      center: [-74.210, 11.243],
-      zoom: 12
+    // Lugares (15 ejemplos)
+    const lugares = [
+      { nombre:"Taganga", tipo:"Zona turística", info:"Playa y pueblo pesquero.", img:"/img/taganga.jpg", coords:[-74.215,11.25], seguridad:"Media", reseñas:[{rating:5,comentario:"Hermoso para bucear"}]},
+      { nombre:"Playa Blanca", tipo:"Zona turística", info:"Arena blanca y aguas cristalinas.", img:"/img/playablanca.jpg", coords:[-74.23,11.20], seguridad:"Alta", reseñas:[{rating:5,comentario:"El agua es espectacular"}]},
+      { nombre:"Centro Histórico", tipo:"Zona turística", info:"Arquitectura colonial y museos.", img:"/img/centro.jpg", coords:[-74.198,11.241], seguridad:"Alta", reseñas:[{rating:4,comentario:"Bonito para caminar"}]},
+      { nombre:"El Rodadero", tipo:"Zona turística", info:"Playa popular con hoteles.", img:"/img/rodadero.jpg", coords:[-74.215,11.21], seguridad:"Media", reseñas:[{rating:4,comentario:"Muy concurrido"}]},
+      { nombre:"Parque Tayrona", tipo:"Zona turística", info:"Parque natural con playas vírgenes.", img:"/img/tayrona.jpg", coords:[-74.05,11.3], seguridad:"Alta", reseñas:[{rating:5,comentario:"Increíble naturaleza"}]},
+      { nombre:"Restaurante La Marina", tipo:"Restaurante", info:"Comida típica costeña.", img:"/img/lamarina.jpg", coords:[-74.2,11.24], seguridad:"Alta", precio:"$20.000 COP", reseñas:[{rating:5,comentario:"Excelente pescado"}]},
+      { nombre:"Restaurante El Pescaito", tipo:"Restaurante", info:"Especialidad en mariscos.", img:"/img/pescaito.jpg", coords:[-74.22,11.26], seguridad:"Media", precio:"$25.000 COP", reseñas:[{rating:4,comentario:"Buen ceviche"}]},
+      { nombre:"Hotel Económico Caribe", tipo:"Hotel", info:"Hotel sencillo cerca del centro.", img:"/img/hotelcaribe.jpg", coords:[-74.199,11.242], seguridad:"Alta", precio:"$60.000 COP/noche", reseñas:[{rating:4,comentario:"Cómodo y barato"}]},
+      { nombre:"Hostal Taganga", tipo:"Hotel", info:"Hostal económico frente al mar.", img:"/img/hostaltaganga.jpg", coords:[-74.216,11.251], seguridad:"Media", precio:"$40.000 COP/noche", reseñas:[{rating:5,comentario:"Vista espectacular"}]},
+      { nombre:"Restaurante Mi Ranchito", tipo:"Restaurante", info:"Comida casera y económica.", img:"/img/miranchito.jpg", coords:[-74.21,11.245], seguridad:"Alta", precio:"$15.000 COP", reseñas:[{rating:4,comentario:"Muy hogareño"}]},
+      { nombre:"Hotel Playa Bonita", tipo:"Hotel", info:"Hotel económico en Playa Blanca.", img:"/img/playabonita.jpg", coords:[-74.231,11.201], seguridad:"Alta", precio:"$70.000 COP/noche", reseñas:[{rating:4,comentario:"Buen servicio"}]},
+      { nombre:"Restaurante El Centro", tipo:"Restaurante", info:"Menús ejecutivos económicos.", img:"/img/elcentro.jpg", coords:[-74.197,11.241], seguridad:"Alta", precio:"$12.000 COP", reseñas:[{rating:3,comentario:"Rápido y barato"}]},
+      { nombre:"Hotel Rodadero Express", tipo:"Hotel", info:"Hotel económico en El Rodadero.", img:"/img/rodaderoexpress.jpg", coords:[-74.214,11.212], seguridad:"Media", precio:"$65.000 COP/noche", reseñas:[{rating:4,comentario:"Cerca de la playa"}]},
+      { nombre:"Restaurante Tayrona Verde", tipo:"Restaurante", info:"Comida saludable y vegetariana.", img:"/img/tayronaverde.jpg", coords:[-74.06,11.31], seguridad:"Alta", precio:"$18.000 COP", reseñas:[{rating:5,comentario:"Muy fresco"}]},
+      { nombre:"Hotel Bonda Económico", tipo:"Hotel", info:"Hotel sencillo en Bonda.", img:"/img/bonda.jpg", coords:[-74.15,11.28], seguridad:"Media", precio:"$50.000 COP/noche", reseñas:[{rating:3,comentario:"Básico pero cómodo"}]}
+    ]
+
+    // Crear features
+    const features = lugares.map(lugar => {
+      const feature = new Feature({
+        geometry: new Point(fromLonLat(lugar.coords)),
+        lugar
+      })
+      feature.setStyle(new Style({
+        image: new Icon({
+          src: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+          scale: 0.05
+        })
+      }))
+      return feature
     })
 
-    this.map.addControl(new maplibregl.NavigationControl(), 'top-right')
-    this.map.on('load', () => this.renderMarkers())
-  },
-  methods: {
-    colorPorSeguridad(seguridad) {
-      if (seguridad === 'seguro') return '#1a7a5e'
-      if (seguridad === 'poco-seguro') return '#e07b00'
-      return '#cc3333'
-    },
-    renderMarkers() {
-      this.lugaresLocales.forEach(lugar => {
-        const el = document.createElement('div')
-        el.className = 'marker'
-        el.style.backgroundColor = this.colorPorSeguridad(lugar.seguridad)
+    // Clustering
+    const clusterSource = new Cluster({
+      distance: 40,
+      source: new VectorSource({ features })
+    })
 
-        new maplibregl.Marker(el)
-          .setLngLat(lugar.coords)
-          .setPopup(
-            new maplibregl.Popup({ offset: 25 }).setHTML(`
-              <div class="popup-inner">
-                <img src="${lugar.img}" alt="${lugar.nombre}" onerror="this.style.display='none'" />
-                <strong>${lugar.nombre}</strong>
-                <span class="popup-tipo">${lugar.tipo || ''}</span>
-                <p>${lugar.info}</p>
-                <small>${lugar.reseña || ''}</small>
-                <a href="/#/lugar/${lugar.id}" class="popup-link">Ver detalles →</a>
-              </div>
-            `)
-          )
-          .addTo(this.map)
-      })
-    },
-    agregarLugar() {
-      const nuevo = {
-        id: Date.now(),
-        nombre: this.nuevoLugar.nombre,
-        tipo: 'Lugar',
-        coords: [this.nuevoLugar.lng, this.nuevoLugar.lat],
-        info: this.nuevoLugar.info,
-        img: this.nuevoLugar.img,
-        reseña: "Agregado por administrador",
-        seguridad: 'seguro',
-        activo: true
+    const clusterLayer = new VectorLayer({
+      source: clusterSource,
+      style: feature => {
+        const size = feature.get('features').length
+        if (size > 1) {
+          return new Style({
+            image: new Icon({
+              src: 'https://cdn-icons-png.flaticon.com/512/252/252025.png',
+              scale: 0.05
+            }),
+            text: new Text({
+              text: size.toString(),
+              fill: new Fill({ color: '#fff' }),
+              stroke: new Stroke({ color: '#000', width: 2 })
+            })
+          })
+        } else {
+          return feature.get('features')[0].getStyle()
+        }
       }
-      this.lugaresLocales.push(nuevo)
-      this.renderMarkers()
-      this.nuevoLugar = { nombre: '', info: '', img: '', lng: null, lat: null }
-      alert(`Lugar "${nuevo.nombre}" agregado al mapa.`)
-    },
-    cerrarSesion() {
-      auth.logout()
-      this.$router.push('/')
-    }
+    })
+
+    const map = new Map({
+      target: 'map',
+      layers: [
+        new TileLayer({ source: new OSM() }),
+        clusterLayer
+      ],
+      view: new View({
+        center: fromLonLat([-74.210, 11.243]),
+        zoom: 12
+      })
+    })
+
+    // Popup
+    const popup = document.getElementById('popup')
+    const overlay = new Overlay({ element: popup, autoPan: true, autoPanAnimation: { duration: 250 } })
+    map.addOverlay(overlay)
+
+    map.on('singleclick', evt => {
+      map.forEachFeatureAtPixel(evt.pixel, feature => {
+        const clusterFeatures = feature.get('features')
+        if (clusterFeatures.length === 1) {
+          const lugar = clusterFeatures[0].get('lugar')
+          popup.innerHTML = `
+            <div class="card-lugar">
+              <img src="${lugar.img}" class="imagen"/>
+              <h3>${lugar.nombre}</h3>
+              <p><strong>${lugar.tipo}</strong> - ${lugar.info}</p>
+              <p><strong>Seguridad:</strong> ${lugar.seguridad}</p>
+              ${lugar.precio ? `<p><strong>Precio:</strong> ${lugar.precio}</p>` : ""}
+              <div class="reseñas">
+                <strong>Reseñas:</strong><br/>
+                ${lugar.reseñas.map(r => `⭐ ${r.rating} - ${r.comentario}`).join("<br/>")}
+              </div>
+            </div>
+          `
+          overlay.setPosition(evt.coordinate)
+        }
+      })
+    })
   }
 }
 </script>
 
-<style scoped>
-.map-page { display: flex; flex-direction: column; height: 100vh; }
-.map-container { flex: 1; width: 100%; }
-
-.marker {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: 2.5px solid white;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,.3);
-  transition: transform .15s;
-}
-.marker:hover { transform: scale(1.3); }
-
-.admin-panel {
-  position: absolute;
-  top: 72px;
-  right: 16px;
-  background: white;
-  padding: 1.2rem;
-  border-radius: 12px;
-  box-shadow: 0 6px 24px rgba(0,0,0,.15);
-  min-width: 240px;
-  z-index: 10;
-}
-.admin-panel h3 {
-  margin: 0 0 12px;
-  font-size: 15px;
-  color: #0a4f6e;
-}
-.admin-panel input {
-  display: block;
-  margin: 6px 0;
-  padding: 8px 10px;
-  width: 100%;
-  box-sizing: border-box;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 13px;
-}
-.admin-panel button[type="submit"] {
-  margin-top: 8px;
-  padding: 8px 16px;
-  width: 100%;
-  background: #0a4f6e;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background .2s;
-}
-.admin-panel button[type="submit"]:hover { background: #0d6b94; }
-.btn-logout {
-  margin-top: 8px;
-  padding: 6px 16px;
-  width: 100%;
-  background: transparent;
-  color: #cc3333;
-  border: 1px solid #cc3333;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  transition: background .2s;
-}
-.btn-logout:hover { background: #fff0f0; }
-</style>
-
 <style>
-/* Estilos globales para el popup de maplibre */
-.popup-inner {
-  font-family: Georgia, serif;
-  max-width: 220px;
-  text-align: left;
+.map-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
-.popup-inner img {
+
+.map-container {
+  flex: 1;
   width: 100%;
-  height: 110px;
+  height: 100vh;
+}
+
+/* Popup estilo tarjeta */
+.ol-popup {
+  background: white;
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  max-width: 260px;
+  font-family: Roboto, Arial, sans-serif;
+}
+
+.card-lugar img.imagen {
+  width: 100%;
+  height: 120px;
   object-fit: cover;
   border-radius: 6px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
-.popup-inner strong {
-  display: block;
-  font-size: 14px;
-  color: #0a4f6e;
-  margin-bottom: 2px;
-}
-.popup-tipo {
-  display: block;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  color: #999;
-  margin-bottom: 4px;
-}
-.popup-inner p {
-  font-size: 12px;
-  color: #555;
+
+.card-lugar h3 {
   margin: 4px 0;
-  line-height: 1.4;
+  font-size: 16px;
+  font-weight: bold;
 }
-.popup-inner small {
-  font-size: 11px;
-  color: #888;
-  font-style: italic;
+
+.card-lugar p {
+  font-size: 13px;
+  color: #555;
+  margin: 2px 0;
 }
-.popup-link {
-  display: inline-block;
-  margin-top: 8px;
+
+.reseñas {
   font-size: 12px;
-  color: #1a7a5e;
-  font-weight: 600;
-  text-decoration: none;
+  margin-top: 6px;
+}
+
+.acciones {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.acciones button {
+  flex: 1;
+  margin: 0 2px;
+  padding: 6px;
+  font-size: 12px;
+  border: none;
+  border-radius: 4px;
+  background: #007AFF;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.acciones button:hover {
+  background: #005BBB;
 }
 </style>
