@@ -117,6 +117,6 @@ export default {
   text-decoration: none;
   position: absolute;
   top: 2px;
-  right: 8px;
+  right: 8px;s
 }
 </style>
