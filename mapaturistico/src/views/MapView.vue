@@ -52,7 +52,7 @@ export default {
     const overlay = new Overlay({
       element: container,
       autoPan: true,
-      autoPanAnimation: { duration: 150 } // más rápido
+      autoPanAnimation: { duration: 150 }
     })
     map.addOverlay(overlay)
 
@@ -68,7 +68,7 @@ export default {
         const coords = feature.getGeometry().getCoordinates()
         overlay.setPosition(coords)
 
-        // Card sin imagen, solo descripción, precio y seguridad
+        // Card con toda la info del lugar
         content.innerHTML = `
           <div class="popup-card">
             <div class="popup-info">
@@ -114,6 +114,7 @@ export default {
   font-family: Arial, sans-serif;
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   background: #fff;
+  animation: fadeIn 0.2s ease-in-out;
 }
 
 .popup-info {
@@ -144,5 +145,10 @@ export default {
   position: absolute;
   top: 2px;
   right: 8px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
