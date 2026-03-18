@@ -1,26 +1,26 @@
 // Fuente única de datos para todos los lugares turísticos
 export const lugares = [
-  {
-    id: 1,
-    nombre: "Centro Histórico",
-    tipo: "Zona",
-    info: "Hoteles boutique, restaurantes típicos y arquitectura colonial.",
-    descripcion: "El corazón cultural de Santa Marta. Calles empedradas, edificios coloniales del siglo XVII y una vibrante vida nocturna rodeada de gastronomía local.",
-    coords: [-74.2100, 11.2430],
-    img: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Santa_Marta_Centro_Historico.jpg",
-    reseña: "Un lugar lleno de historia y cultura imperdible.",
-    seguridad: "seguro",
-    precio: "$200.000 COP",
-    activo: true,
-    url: "https://santamarta.gov.co"
-  },
+  // {
+  //   id: 1,
+  //   nombre: "Centro Histórico",
+  //   tipo: "Zona",
+  //   info: "Hoteles boutique, restaurantes típicos y arquitectura colonial.",
+  //   descripcion: "El corazón cultural de Santa Marta. Calles empedradas, edificios coloniales del siglo XVII y una vibrante vida nocturna rodeada de gastronomía local.",
+  //   coords: [-74.2442, 11.2215],
+  //   img: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Santa_Marta_Centro_Historico.jpg",
+  //   reseña: "Un lugar lleno de historia y cultura imperdible.",
+  //   seguridad: "seguro",
+  //   precio: "$200.000 COP",
+  //   activo: true,
+  //   url: null
+  // },
   {
     id: 2,
     nombre: "El Rodadero",
     tipo: "Playa",
     info: "Playas populares y hoteles familiares frente al mar.",
     descripcion: "La playa más visitada de Santa Marta. Ideal para familias, con una gran oferta hotelera, deportes acuáticos y restaurantes de mariscos.",
-    coords: [-74.2250, 11.2070],
+    coords: [11.2014, -74.2281],
     img: "https://upload.wikimedia.org/wikipedia/commons/4/4a/Rodadero_Santa_Marta.jpg",
     reseña: "La playa más visitada de Santa Marta.",
     seguridad: "seguro",
