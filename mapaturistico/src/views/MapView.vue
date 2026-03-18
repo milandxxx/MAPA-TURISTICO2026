@@ -1,11 +1,8 @@
 <template>
   <div class="map-page">
     <Navbar />
-    <!-- Contenedor del mapa -->
     <div id="map" class="map-container"></div>
-    <!-- Buscador flotante -->
     <SearchBox :map="mapInstance" />
-    <!-- Popup estilo Google Maps -->
     <div id="popup" class="ol-popup">
       <a href="#" id="popup-closer" class="ol-popup-closer"></a>
       <div id="popup-content"></div>
@@ -55,7 +52,7 @@ export default {
     const overlay = new Overlay({
       element: container,
       autoPan: true,
-      autoPanAnimation: { duration: 250 }
+      autoPanAnimation: { duration: 150 } // más rápido
     })
     map.addOverlay(overlay)
 
@@ -70,7 +67,18 @@ export default {
       if (feature) {
         const coords = feature.getGeometry().getCoordinates()
         overlay.setPosition(coords)
-        content.innerHTML = `<strong>${feature.get('nombre')}</strong>`
+
+        // Card sin imagen, solo descripción, precio y seguridad
+        content.innerHTML = `
+          <div class="popup-card">
+            <div class="popup-info">
+              <h3>${feature.get('nombre') || ''}</h3>
+              ${feature.get('descripcion') ? `<p>${feature.get('descripcion')}</p>` : ''}
+              ${feature.get('precio') ? `<p><strong>Precio:</strong> ${feature.get('precio')}</p>` : ''}
+              ${feature.get('seguridad') ? `<p><strong>Seguridad:</strong> ${feature.get('seguridad')}</p>` : ''}
+            </div>
+          </div>
+        `
       } else {
         overlay.setPosition(undefined)
       }
@@ -85,38 +93,56 @@ export default {
 .map-page {
   display: flex;
   flex-direction: column;
-  height: 100vh; /* toda la ventana */
+  height: 100vh;
 }
 
 .map-container {
   flex: 1;
   width: 100%;
-  height: 100%; /* ocupa todo el espacio disponible */
+  height: 100%;
   position: relative;
-  background: #e5e5e5; /* color de fondo mientras carga */
+  background: #e5e5e5;
+}
+
+/* Card estilo Google Maps */
+.popup-card {
+  display: flex;
+  flex-direction: column;
+  width: 280px;
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  background: #fff;
+}
+
+.popup-info {
+  padding: 12px;
+}
+
+.popup-info h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  color: #202124;
+}
+
+.popup-info p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #555;
 }
 
 .ol-popup {
   position: absolute;
-  background-color: white;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  padding: 15px;
-  border-radius: 12px;
-  border: 1px solid #ccc;
+  border: none;
   bottom: 12px;
   left: -50px;
-  min-width: 200px;
-}
-
-.ol-popup strong {
-  font-size: 16px;
-  color: #202124;
 }
 
 .ol-popup-closer {
   text-decoration: none;
   position: absolute;
   top: 2px;
-  right: 8px;s
+  right: 8px;
 }
 </style>
