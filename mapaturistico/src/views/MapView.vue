@@ -1,10 +1,20 @@
 <template>
   <div class="map-page">
-    <Navbar />
+    <Navbar @buscar="searchLocation" />
     <div id="map" class="map-container"></div>
-    <SearchBox :map="mapInstance" />
+
+    <!-- Lista de lugares -->
+    <div v-show="mostrarLista" class="lista-lugares">
+      <ul>
+        <li v-for="lugar in lugares" :key="lugar.nombre">
+          <button @click="centrarLugar(lugar)">{{ lugar.nombre }}</button>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Popup estilo Google Maps -->
     <div id="popup" class="ol-popup">
-      <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+      <a href="#" id="popup-closer" class="ol-popup-closer">✖</a>
       <div id="popup-content"></div>
     </div>
   </div>
@@ -17,16 +27,42 @@ import OSM from 'ol/source/OSM'
 import { fromLonLat } from 'ol/proj'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
+import Feature from 'ol/Feature'
+import Point from 'ol/geom/Point'
+import { Style, Icon } from 'ol/style'
 import Navbar from "../components/Navbar.vue"
-import SearchBox from "../components/SearchBox.vue"
 
 export default {
   name: "MapView",
-  components: { Navbar, SearchBox },
+  components: { Navbar },
   data() {
     return {
       mapInstance: null,
-      vectorLayer: null
+      vectorLayer: null,
+      mostrarLista: false,
+      lugares: [
+        {
+          nombre: "El Rodadero",
+          descripcion: "Playa urbana con ambiente turístico. Acceso libre.",
+          precio: "Acceso libre. Carpas desde 20.000 COP. Acuario: 35.000 COP",
+          seguridad: "Alta",
+          coords: [-74.215, 11.209]
+        },
+        {
+          nombre: "Minca",
+          descripcion: "Montaña con cascadas y café.",
+          precio: "Tour desde 50.000 COP",
+          seguridad: "Media",
+          coords: [-74.118, 11.146]
+        },
+        {
+          nombre: "Parque Tayrona",
+          descripcion: "Parque nacional con playas vírgenes.",
+          precio: "Entrada desde 20.000 COP",
+          seguridad: "Alta",
+          coords: [-73.943, 11.3]
+        }
+      ]
     }
   },
   mounted() {
@@ -39,12 +75,11 @@ export default {
         this.vectorLayer
       ],
       view: new View({
-        center: fromLonLat([-74.2, 11.24]), // Santa Marta
+        center: fromLonLat([-74.2, 11.24]),
         zoom: 12
       })
     })
 
-    // Popup estilo Google Maps
     const container = document.getElementById('popup')
     const content = document.getElementById('popup-content')
     const closer = document.getElementById('popup-closer')
@@ -68,7 +103,6 @@ export default {
         const coords = feature.getGeometry().getCoordinates()
         overlay.setPosition(coords)
 
-        // Card con toda la info del lugar
         content.innerHTML = `
           <div class="popup-card">
             <div class="popup-info">
@@ -85,6 +119,45 @@ export default {
     })
 
     this.mapInstance = map
+  },
+  methods: {
+    centrarLugar(lugar) {
+      const feature = new Feature({
+        geometry: new Point(fromLonLat(lugar.coords)),
+        nombre: lugar.nombre,
+        descripcion: lugar.descripcion,
+        precio: lugar.precio,
+        seguridad: lugar.seguridad
+      })
+      feature.setStyle(new Style({
+        image: new Icon({
+          src: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+          scale: 0.05,
+          anchor: [0.5, 1]
+        })
+      }))
+
+      this.vectorLayer.getSource().clear()
+      this.vectorLayer.getSource().addFeature(feature)
+
+      this.mapInstance.getView().animate({
+        center: fromLonLat(lugar.coords),
+        zoom: 15,
+        duration: 1000
+      })
+    },
+
+    searchLocation(query) {
+      if (!query) return
+      const lugarLocal = this.lugares.find(l =>
+        l.nombre.toLowerCase() === query.toLowerCase()
+      )
+      if (lugarLocal) {
+        this.centrarLugar(lugarLocal)
+      } else {
+        alert(`"${query}" no está en el catálogo`)
+      }
+    }
   }
 }
 </script>
@@ -94,6 +167,7 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  font-family: 'Roboto', Arial, sans-serif;
 }
 
 .map-container {
@@ -104,6 +178,43 @@ export default {
   background: #e5e5e5;
 }
 
+/* Lista de lugares */
+.lista-lugares {
+  position: absolute;
+  top: 60px;
+  left: 10px;
+  background: white;
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  z-index: 1000;
+}
+
+.lista-lugares ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.lista-lugares li {
+  margin: 4px 0;
+}
+
+.lista-lugares button {
+  background: #f5f5f5;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.lista-lugares button:hover {
+  background: #1976d2;
+  color: white;
+}
+
 /* Card estilo Google Maps */
 .popup-card {
   display: flex;
@@ -111,7 +222,7 @@ export default {
   width: 280px;
   border-radius: 12px;
   overflow: hidden;
-  font-family: Arial, sans-serif;
+  font-family: 'Roboto', Arial, sans-serif;
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   background: #fff;
   animation: fadeIn 0.2s ease-in-out;
@@ -133,11 +244,13 @@ export default {
   color: #555;
 }
 
+/* Contenedor del popup */
 .ol-popup {
   position: absolute;
   border: none;
   bottom: 12px;
   left: -50px;
+  background: transparent;
 }
 
 .ol-popup-closer {
@@ -145,10 +258,34 @@ export default {
   position: absolute;
   top: 2px;
   right: 8px;
+  font-size: 18px;
+  color: #666;
+  transition: color 0.2s ease-in-out;
 }
 
+.ol-popup-closer:hover {
+  color: #1976d2;
+}
+
+/* Animación de entrada */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsividad */
+@media (max-width: 600px) {
+  .lista-lugares {
+    top: 50px;
+    left: 5px;
+    padding: 6px;
+  }
+  .lista-lugares button {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  .popup-card {
+    width: 220px;
+  }
 }
 </style>

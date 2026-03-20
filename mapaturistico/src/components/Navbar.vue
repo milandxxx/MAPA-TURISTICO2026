@@ -1,64 +1,86 @@
 <template>
   <nav class="navbar">
-    <router-link to="/" class="nav-brand">
-      <span class="brand-icon">🌴</span>
-      <span>Santa Marta</span>
-    </router-link>
-    <div class="nav-links">
-      <router-link to="/" class="nav-link" exact-active-class="active">Inicio</router-link>
-      <router-link to="/mapa" class="nav-link" active-class="active">Mapa</router-link>
-      <router-link v-if="isAdmin" to="/mapa" class="nav-link admin-indicator">⚙ Admin</router-link>
+    <div class="nav-left">
+      <router-link to="/">Inicio</router-link>
+      <router-link to="/mapa">Mapa</router-link>
+    </div>
+    <div class="nav-center">
+      <!-- Buscador editable -->
+      <input 
+        v-model="query" 
+        @keyup.enter="$emit('buscar', query)" 
+        placeholder="Buscar lugar..." 
+      />
     </div>
   </nav>
 </template>
 
 <script>
-import { auth } from '../auth/auth.js'
-
 export default {
-  name: 'AppNavbar',
-  computed: {
-    isAdmin() {
-      return auth.isAdmin()
-    }
+  name: "Navbar",
+  data() {
+    return { query: "" }
   }
 }
 </script>
 
-<style scoped>
+<style>
 .navbar {
-  background: #0a4f6e;
-  padding: 0 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 56px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 12px rgba(0,0,0,.15);
+  background: #1976d2;
+  color: white;
+  padding: 8px 16px;
+  font-family: 'Roboto', Arial, sans-serif;
 }
-.nav-brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+
+.nav-left a {
+  margin-right: 12px;
   color: white;
   text-decoration: none;
-  font-family: Georgia, serif;
-  font-size: 16px;
-  font-weight: 400;
+  font-weight: 500;
+  transition: color 0.2s ease-in-out;
 }
-.brand-icon { font-size: 20px; }
-.nav-links { display: flex; gap: 4px; align-items: center; }
-.nav-link {
-  color: rgba(255,255,255,.7);
-  text-decoration: none;
+
+.nav-left a:hover {
+  text-decoration: underline;
+  color: #bbdefb;
+}
+
+.nav-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-center input {
+  border-radius: 16px;
+  border: none;
+  padding: 6px 12px;
+  min-width: 250px;
+  text-align: center;
+  background: #fff;
+  color: #555;
   font-size: 14px;
-  padding: 6px 14px;
-  border-radius: 6px;
-  transition: background .2s, color .2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: box-shadow 0.2s ease-in-out;
 }
-.nav-link:hover { background: rgba(255,255,255,.1); color: white; }
-.nav-link.active { background: rgba(255,255,255,.15); color: white; }
-.admin-indicator { color: #7ee8c8; font-size: 13px; }
+
+.nav-center input:focus {
+  outline: none;
+  box-shadow: 0 0 6px rgba(25,118,210,0.6);
+}
+
+/* Responsividad */
+@media (max-width: 600px) {
+  .nav-center input {
+    min-width: 180px;
+    font-size: 12px;
+  }
+  .nav-left a {
+    margin-right: 8px;
+    font-size: 12px;
+  }
+}
 </style>
