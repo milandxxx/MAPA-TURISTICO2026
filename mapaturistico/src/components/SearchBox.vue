@@ -34,8 +34,6 @@ export default {
       if (data.length > 0) {
         const lon = parseFloat(data[0].lon)
         const lat = parseFloat(data[0].lat)
-
-        // Crear marcador
         const feature = new Feature({
           geometry: new Point(fromLonLat([lon, lat])),
           nombre: this.query
@@ -47,19 +45,13 @@ export default {
             anchor: [0.5, 1]
           })
         }))
-
-        // Buscar la capa de vectores (segunda capa del mapa)
         let vectorLayer = this.map.getLayers().item(1)
         if (!vectorLayer) {
           vectorLayer = new VectorLayer({ source: new VectorSource() })
           this.map.addLayer(vectorLayer)
         }
-
-        // Limpiar capa y añadir solo este marcador
         vectorLayer.getSource().clear()
         vectorLayer.getSource().addFeature(feature)
-
-        // Centrar mapa en el resultado
         this.map.getView().setCenter(fromLonLat([lon, lat]))
         this.map.getView().setZoom(15)
       } else {
