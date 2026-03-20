@@ -5,7 +5,6 @@
       <router-link to="/mapa">Mapa</router-link>
     </div>
     <div class="nav-center">
-      <!-- Buscador editable -->
       <input 
         v-model="query" 
         @keyup.enter="$emit('buscar', query)" 
@@ -71,8 +70,6 @@ export default {
   outline: none;
   box-shadow: 0 0 6px rgba(25,118,210,0.6);
 }
-
-/* Responsividad */
 @media (max-width: 600px) {
   .nav-center input {
     min-width: 180px;

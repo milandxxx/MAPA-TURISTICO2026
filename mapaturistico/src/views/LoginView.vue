@@ -70,8 +70,6 @@ export default {
     async login() {
       this.error = ''
       this.cargando = true
-
-      // Pequeño delay para simular verificación (mejora UX)
       await new Promise(r => setTimeout(r, 600))
 
       if (auth.login(this.username, this.password)) {

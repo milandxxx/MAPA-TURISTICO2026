@@ -2,8 +2,6 @@
   <div class="map-page">
     <Navbar @buscar="searchLocation" />
     <div id="map" class="map-container"></div>
-
-    <!-- Lista de lugares -->
     <div v-show="mostrarLista" class="lista-lugares">
       <ul>
         <li v-for="lugar in lugares" :key="lugar.nombre">
@@ -11,8 +9,6 @@
         </li>
       </ul>
     </div>
-
-    <!-- Popup estilo Google Maps -->
     <div id="popup" class="ol-popup">
       <a href="#" id="popup-closer" class="ol-popup-closer">✖</a>
       <div id="popup-content"></div>
@@ -177,8 +173,6 @@ export default {
   position: relative;
   background: #e5e5e5;
 }
-
-/* Lista de lugares */
 .lista-lugares {
   position: absolute;
   top: 60px;
@@ -214,8 +208,6 @@ export default {
   background: #1976d2;
   color: white;
 }
-
-/* Card estilo Google Maps */
 .popup-card {
   display: flex;
   flex-direction: column;
@@ -243,8 +235,6 @@ export default {
   font-size: 14px;
   color: #555;
 }
-
-/* Contenedor del popup */
 .ol-popup {
   position: absolute;
   border: none;
@@ -266,14 +256,10 @@ export default {
 .ol-popup-closer:hover {
   color: #1976d2;
 }
-
-/* Animación de entrada */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
-/* Responsividad */
 @media (max-width: 600px) {
   .lista-lugares {
     top: 50px;
