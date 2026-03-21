@@ -1,85 +1,44 @@
 <template>
   <div class="login-page">
-    <div class="login-card">
-      <div class="lamp-wrap">
-        <div class="bulb"></div>
-        <div class="light"></div>
-      </div>
-      <h2>Acceso Administrador</h2>
-      <p class="subtitle">Panel de gestión del mapa turístico</p>
-
-      <form @submit.prevent="login" class="login-form" novalidate>
-        <div class="field">
-          <label>Usuario</label>
-          <input
-            v-model="username"
-            type="text"
-            placeholder="Tu usuario"
-            autocomplete="username"
-            required
-          />
-        </div>
-        <div class="field">
-          <label>Contraseña</label>
-          <div class="input-wrap">
-            <input
-              v-model="password"
-              :type="showPass ? 'text' : 'password'"
-              placeholder="Tu contraseña"
-              autocomplete="current-password"
-              required
-            />
-            <button type="button" class="toggle-pass" @click="showPass = !showPass">
-              {{ showPass ? '🙈' : '👁️' }}
-            </button>
-          </div>
-        </div>
-
-        <p v-if="error" class="error" role="alert">{{ error }}</p>
-        <p v-if="intentos >= 3" class="warning">
-          ⚠️ Demasiados intentos fallidos. Verifica tus credenciales.
-        </p>
-
-        <button type="submit" class="btn-submit" :disabled="cargando">
-          <span v-if="cargando">Entrando…</span>
-          <span v-else>Entrar</span>
-        </button>
-      </form>
-
-      <router-link to="/" class="back-link">← Volver al inicio</router-link>
+    <div class="lamp">
+      <div class="lamp-light" :class="{ active: mostrarLogin }"></div>
+      <button class="lamp-rope" @click="toggleLogin">
+        🪢 Tirar cuerda
+      </button>
     </div>
+    <transition name="fade-slide">
+      <div v-if="mostrarLogin" class="login-form">
+        <h2>Acceso Administrador</h2>
+        <p>Panel de gestión del mapa turístico</p>
+        <input type="text" placeholder="Usuario" v-model="usuario" />
+        <input type="password" placeholder="Contraseña" v-model="contrasena" />
+        <button @click="entrar">Entrar</button>
+        <router-link to="/" class="volver">← Volver al inicio</router-link>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script>
-import { auth } from '../auth/auth.js'
-
 export default {
-  name: 'LoginView',
+  name: "LoginPage",
   data() {
     return {
-      username: '',
-      password: '',
-      showPass: false,
-      error: '',
-      cargando: false,
-      intentos: 0
+      mostrarLogin: false,
+      usuario: "",
+      contrasena: ""
     }
   },
   methods: {
-    async login() {
-      this.error = ''
-      this.cargando = true
-      await new Promise(r => setTimeout(r, 600))
+    toggleLogin() {
+      this.mostrarLogin = !this.mostrarLogin
+    },
+    entrar() {
+if (this.usuario === "admin" && this.contrasena === "1234") {
+  localStorage.setItem("isAdmin", "true")
+  this.$router.push("/admin")
+}
 
-      if (auth.login(this.username, this.password)) {
-        this.$router.push('/mapa')
-      } else {
-        this.intentos++
-        this.error = 'Usuario o contraseña incorrectos.'
-        this.password = ''
-      }
-      this.cargando = false
     }
   }
 }
@@ -87,133 +46,93 @@ export default {
 
 <style scoped>
 .login-page {
-  min-height: 100vh;
-  background: #0d1b2a;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
-  font-family: 'Georgia', serif;
-}
-.login-card {
-  background: #1b263b;
-  padding: 2.5rem;
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0,0,0,.5);
-  width: 100%;
-  max-width: 380px;
-  text-align: center;
+  height: 100vh;
+  background: linear-gradient(180deg, #111 0%, #222 100%);
   color: white;
+  font-family: 'Roboto', Arial, sans-serif;
 }
-.lamp-wrap { position: relative; margin-bottom: 1.5rem; height: 60px; }
-.bulb {
-  width: 36px;
-  height: 36px;
-  background: #ffeb3b;
+.lamp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.lamp-light {
+  width: 60px;
+  height: 60px;
+  background: #555;
   border-radius: 50%;
-  margin: 0 auto;
-  animation: glow 1.5s infinite alternate;
+  box-shadow: 0 0 10px #333;
+  transition: all 0.4s ease-in-out;
 }
-.light {
-  width: 100px;
-  height: 100px;
-  background: radial-gradient(circle, rgba(255,235,59,.3) 0%, transparent 70%);
-  border-radius: 50%;
-  position: absolute;
-  top: -32px;
-  left: 50%;
-  transform: translateX(-50%);
-  animation: pulse 2s infinite;
-  pointer-events: none;
+.lamp-light.active {
+  background: yellow;
+  box-shadow: 0 0 25px yellow, 0 0 50px rgba(255,255,0,0.6);
 }
-@keyframes glow {
-  from { box-shadow: 0 0 8px #ffeb3b; }
-  to   { box-shadow: 0 0 28px #ffeb3b, 0 0 60px rgba(255,235,59,.3); }
-}
-@keyframes pulse {
-  from { transform: translateX(-50%) scale(1);   opacity: .6; }
-  to   { transform: translateX(-50%) scale(1.25); opacity: .15; }
-}
-h2 { margin: 0 0 4px; font-size: 1.4rem; font-weight: 400; }
-.subtitle { font-size: 13px; color: rgba(255,255,255,.5); margin: 0 0 1.8rem; }
-
-.login-form { text-align: left; }
-.field { margin-bottom: 1rem; }
-.field label {
-  display: block;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  color: rgba(255,255,255,.5);
-  margin-bottom: 5px;
-}
-.field input, .input-wrap input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 10px 12px;
-  background: rgba(255,255,255,.07);
-  border: 1px solid rgba(255,255,255,.15);
-  border-radius: 8px;
-  color: white;
-  font-size: 14px;
-  transition: border-color .2s;
-}
-.field input:focus, .input-wrap input:focus {
-  outline: none;
-  border-color: rgba(126,232,200,.6);
-}
-.input-wrap { position: relative; }
-.input-wrap input { padding-right: 40px; }
-.toggle-pass {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
+.lamp-rope {
+  margin-top: 10px;
   background: none;
   border: none;
+  color: white;
   cursor: pointer;
-  font-size: 14px;
-  padding: 0;
+  font-size: 16px;
+  transition: color 0.3s ease-in-out;
 }
-
-.error {
-  background: rgba(220,50,50,.15);
-  border: 1px solid rgba(220,50,50,.3);
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 13px;
-  color: #ff7b7b;
-  margin: 4px 0 12px;
+.lamp-rope:hover { color: #ffd700; }
+.login-form {
+  background: #1e1e1e;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(255,255,0,0.6);
+  text-align: center;
+  width: 280px;
+  animation: popIn 0.4s ease-in-out;
 }
-.warning {
-  font-size: 12px;
-  color: #ffcc66;
-  margin: 0 0 12px;
-}
-
-.btn-submit {
-  width: 100%;
-  padding: 12px;
-  background: #7ee8c8;
-  color: #0a4f6e;
-  border: none;
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity .2s, transform .1s;
-  margin-top: 4px;
-}
-.btn-submit:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); }
-.btn-submit:disabled { opacity: .5; cursor: not-allowed; }
-
-.back-link {
+.login-form h2 { margin-bottom: 8px; color: #ffd700; }
+.login-form p { margin-bottom: 16px; font-size: 14px; color: #ccc; }
+.login-form input {
   display: block;
-  margin-top: 1.5rem;
-  font-size: 13px;
-  color: rgba(255,255,255,.4);
-  text-decoration: none;
-  transition: color .2s;
+  margin: 10px auto;
+  padding: 8px;
+  border-radius: 6px;
+  border: none;
+  width: 90%;
+  background: #333;
+  color: white;
+  transition: box-shadow 0.2s ease-in-out;
 }
-.back-link:hover { color: rgba(255,255,255,.7); }
+.login-form input:focus {
+  outline: none;
+  box-shadow: 0 0 6px rgba(255,215,0,0.8);
+}
+.login-form button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+}
+.login-form button:hover { background: #145a9c; }
+.volver {
+  display: block;
+  margin-top: 12px;
+  color: #bbb;
+  text-decoration: none;
+  font-size: 13px;
+}
+.volver:hover { color: #ffd700; }
+.fade-slide-enter-active, .fade-slide-leave-active { transition: all 0.4s ease; }
+.fade-slide-enter { opacity: 0; transform: translateY(-20px); }
+.fade-slide-leave-to { opacity: 0; transform: translateY(-20px); }
+@keyframes popIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
 </style>

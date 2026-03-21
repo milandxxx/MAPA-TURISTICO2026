@@ -75,14 +75,21 @@ export default {
 </script>
 
 <style scoped>
-.lugar-page { min-height: 100vh; background: #f8f6f1; font-family: Georgia, serif; }
-
+.lugar-page {
+  min-height: 100vh;
+  background: #f8f6f1;
+  font-family: Georgia, serif;
+}
 .lugar-hero {
   height: 360px;
   background-color: #0a4f6e;
   background-size: cover;
   background-position: center;
   position: relative;
+  transition: transform 0.4s ease-in-out;
+}
+.lugar-hero:hover {
+  transform: scale(1.02);
 }
 .hero-overlay {
   position: absolute;
@@ -94,6 +101,7 @@ export default {
 .hero-content {
   padding: 2rem;
   color: white;
+  animation: fadeInUp 0.6s ease-in-out;
 }
 .lugar-tipo {
   display: inline-block;
@@ -116,9 +124,14 @@ export default {
   padding: 4px 12px;
   border-radius: 20px;
   background: rgba(255,255,255,.15);
+  animation: popIn 0.4s ease-in-out;
 }
-
-.lugar-body { max-width: 760px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+.lugar-body {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+  animation: fadeIn 0.6s ease-in-out;
+}
 
 .info-card {
   background: white;
@@ -126,6 +139,11 @@ export default {
   padding: 1.5rem;
   margin-bottom: 1rem;
   border: 1px solid #e8e4dc;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.info-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 .info-card h3 {
   font-size: 12px;
@@ -134,9 +152,16 @@ export default {
   color: #999;
   margin: 0 0 10px;
 }
-.info-card p { font-size: 15px; color: #444; line-height: 1.7; margin: 0; }
-.resena p { font-style: italic; color: #666; }
-
+.info-card p {
+  font-size: 15px;
+  color: #444;
+  line-height: 1.7;
+  margin: 0;
+}
+.resena p {
+  font-style: italic;
+  color: #666;
+}
 .info-meta {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -148,6 +173,10 @@ export default {
   border-radius: 10px;
   padding: 1rem 1.2rem;
   border: 1px solid #e8e4dc;
+  transition: transform 0.3s ease;
+}
+.meta-item:hover {
+  transform: scale(1.03);
 }
 .meta-label {
   display: block;
@@ -157,11 +186,19 @@ export default {
   color: #999;
   margin-bottom: 4px;
 }
-.meta-value { font-size: 15px; font-weight: 600; color: #0a4f6e; }
+.meta-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0a4f6e;
+}
 .activo { color: #1a7a5e !important; }
 .inactivo { color: #cc3333 !important; }
-
-.lugar-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.lugar-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
 .btn-mapa {
   background: #0a4f6e;
   color: white;
@@ -170,24 +207,49 @@ export default {
   border-radius: 8px;
   font-size: 14px;
   cursor: pointer;
-  transition: background .2s;
+  transition: background .2s, transform .2s;
 }
-.btn-mapa:hover { background: #0d6b94; }
+.btn-mapa:hover {
+  background: #0d6b94;
+  transform: translateY(-2px);
+}
 .btn-volver {
   color: #666;
   text-decoration: none;
   font-size: 14px;
   transition: color .2s;
 }
-.btn-volver:hover { color: #0a4f6e; }
-
-.not-found { min-height: 100vh; background: #f8f6f1; }
+.btn-volver:hover {
+  color: #0a4f6e;
+}
+.not-found {
+  min-height: 100vh;
+  background: #f8f6f1;
+}
 .not-found-content {
   max-width: 500px;
   margin: 5rem auto;
   text-align: center;
   padding: 2rem;
+  animation: fadeIn 0.6s ease-in-out;
 }
 .not-found-content h2 { color: #0a4f6e; }
 .not-found-content p { color: #666; margin-bottom: 1.5rem; }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes popIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+@media (max-width: 600px) {
+  .lugar-body { padding: 1.5rem 1rem; }
+  .info-meta { grid-template-columns: 1fr; }
+  .btn-mapa, .btn-volver { font-size: 12px; padding: 10px 18px; }
+}
 </style>
