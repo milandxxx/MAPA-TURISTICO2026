@@ -1,4 +1,4 @@
-# mapaturistico2026
+# mapaturistico
 
 ## Project setup
 ```
