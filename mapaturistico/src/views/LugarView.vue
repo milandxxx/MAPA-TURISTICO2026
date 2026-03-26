@@ -1,6 +1,6 @@
 <template>
   <div class="lugar-page" v-if="lugar">
-    <Navbar />
+    <AppNavbar />
     <div class="lugar-hero" :style="lugar.img ? `background-image: url(${lugar.img})` : ''">
       <div class="hero-overlay">
         <div class="hero-content">
@@ -49,7 +49,7 @@
   </div>
 
   <div v-else class="not-found">
-    <Navbar />
+    <AppNavbar />
     <div class="not-found-content">
       <h2>Lugar no encontrado</h2>
       <p>El lugar que buscas no existe o fue eliminado.</p>
@@ -59,19 +59,7 @@
 </template>
 
 <script>
-import Navbar from '../components/AppNavbar.vue/index.js'
-import { getLugarById } from '../data/lugares.js'
 
-export default {
-  name: 'LugarView',
-  components: { Navbar },
-  props: ['id'],
-  computed: {
-    lugar() {
-      return getLugarById(this.$route.params.id)
-    }
-  }
-}
 </script>
 
 <style scoped>

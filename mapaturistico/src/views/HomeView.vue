@@ -61,13 +61,12 @@
 </template>
 
 <script>
-import AppNavbar from '../components/AppNavbar.vue';
-import Navbar from '../components/AppNavbar.vue/index.js'
-import { lugares } from '../data/lugares.js'
+import AppNavbar from '../components/Navbar.vue/index.js';
+import { lugares } from '../utils/lugares.js'
 
 export default {
   name: "HomeView",
-  components: { Navbar },
+  components: { AppNavbar },
   data() {
     return {
       mostrarPrecios: true,

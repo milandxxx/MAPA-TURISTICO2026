@@ -1,6 +1,6 @@
 <template>
   <div class="about">
-    <Navbar />
+    <AppNavbar />
     <div class="about-content">
       <h1>Acerca del proyecto</h1>
       <p>Mapa Turístico de Santa Marta — Vue 3 + MapLibre GL · 2026</p>
@@ -9,8 +9,8 @@
 </template>
 
 <script>
-import Navbar from '../components/Navbar.vue'
-export default { name: 'AboutView', components: { Navbar } }
+import AppNavbar from '../components/Navbar.vue'
+export default { name: 'AboutView', components: { AppNavbar } }
 </script>
 
 <style scoped>

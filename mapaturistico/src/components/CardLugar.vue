@@ -1,56 +1,33 @@
 <template>
-  <div class="card-lugar">
-    <img :src="lugar.img" alt="foto" class="imagen" @error="hideImg"/>
+  <div v-if="lugar.activo" class="card">
+
+    <img :src="lugar.imagen" />
+
     <h3>{{ lugar.nombre }}</h3>
     <p>{{ lugar.info }}</p>
+    <span>${{ lugar.precio }}</span>
 
-    <div class="reseñas">
-      <h4>Reseñas</h4>
-      <div v-if="lugar.reseñas && lugar.reseñas.length">
-        <div v-for="(r, i) in lugar.reseñas" :key="i">
-          ⭐ {{ r.rating }} - {{ r.comentario }}
-        </div>
-      </div>
-      <div v-else>
-        <em>Sin reseñas aún</em>
-      </div>
-    </div>
+    <BaseButton @click="$emit('verMapa', lugar)">
+      Ver en mapa
+    </BaseButton>
+
   </div>
 </template>
 
-<script>
-export default {
-  name: "CardLugar",
-  props: { lugar: Object },
-  methods: {
-    hideImg(e) { e.target.style.display = 'none' }
-  }
-}
+<script setup>
+import BaseButton from './BaseButton.vue'
+
+defineProps(['lugar'])
+defineEmits(['verMapa'])
 </script>
 
 <style scoped>
-.card-lugar {
-  width: 260px;
-  font-family: Roboto, Arial, sans-serif;
+.card {
+  background: white;
+  border-radius: 10px;
+  padding: 10px;
 }
-.imagen {
+img {
   width: 100%;
-  height: 140px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 8px;
-}
-h3 {
-  font-size: 16px;
-  font-weight: 600;
-  margin: 6px 0;
-}
-p {
-  font-size: 13px;
-  color: #555;
-}
-.reseñas {
-  font-size: 12px;
-  margin-top: 6px;
 }
 </style>
