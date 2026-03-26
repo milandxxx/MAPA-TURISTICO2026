@@ -1,17 +1,10 @@
 <template>
-  <div class="search-box">
-    <input v-model="texto" @input="emitir" placeholder="Buscar..." />
-  </div>
+  <input v-model="texto" placeholder="Buscar lugar..." />
 </template>
 
 <script setup>
-/* global defineEmits */
-import { ref } from 'vue'
-
+import { ref, watch } from 'vue'
 const texto = ref('')
 const emit = defineEmits(['buscar'])
-
-const emitir = () => {
-  emit('buscar', texto.value)
-}
+watch(texto, val => emit('buscar', val))
 </script>

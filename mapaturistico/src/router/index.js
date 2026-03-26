@@ -9,11 +9,7 @@ const routes = [
   { path: '/', component: HomeView },
   { path: '/mapa', component: MapView },
   { path: '/login', component: LoginPage },
-  { 
-    path: '/admin', 
-    component: AdminView,
-    meta: { requiresAuth: true }
-  }
+  { path: '/admin', component: AdminView, meta: { requiresAuth: true } }
 ]
 
 const router = createRouter({
@@ -21,15 +17,10 @@ const router = createRouter({
   routes
 })
 
-// 🔥 PROTECCIÓN GLOBAL
 router.beforeEach((to, from, next) => {
   const auth = localStorage.getItem('auth')
-
-  if (to.meta.requiresAuth && !auth) {
-    next('/login')
-  } else {
-    next()
-  }
+  if (to.meta.requiresAuth && !auth) next('/login')
+  else next()
 })
 
 export default router

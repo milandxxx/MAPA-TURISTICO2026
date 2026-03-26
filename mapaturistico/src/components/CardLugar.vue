@@ -1,33 +1,23 @@
 <template>
-  <div v-if="lugar.activo" class="card">
-
-    <img :src="lugar.imagen" />
-
+  <div class="card">
     <h3>{{ lugar.nombre }}</h3>
     <p>{{ lugar.info }}</p>
-    <span>${{ lugar.precio }}</span>
-
-    <BaseButton @click="$emit('verMapa', lugar)">
-      Ver en mapa
-    </BaseButton>
-
+    <div class="bottom">
+      <span class="precio">💰 {{ lugar.precio }}</span>
+      <span :class="lugar.activo ? 'activo' : 'inactivo'">
+        {{ lugar.activo ? 'Disponible' : 'No disponible' }}
+      </span>
+    </div>
   </div>
 </template>
 
 <script setup>
-import BaseButton from './BaseButton.vue'
-
 defineProps(['lugar'])
-defineEmits(['verMapa'])
 </script>
 
 <style scoped>
-.card {
-  background: white;
-  border-radius: 10px;
-  padding: 10px;
-}
-img {
-  width: 100%;
-}
+.card { background:white;padding:20px;border-radius:15px; }
+.precio{color:#2ecc71}
+.activo{color:green}
+.inactivo{color:red}
 </style>
