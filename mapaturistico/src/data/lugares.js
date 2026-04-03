@@ -1,5 +1,5 @@
 export default [
-  { nombre: 'Playa Blanca', info: 'Agua cristalina', precio: 20, activo: true, coords: [-74.199, 11.245] },
-  { nombre: 'Parque Tayrona', info: 'Naturaleza pura', precio: 30, activo: true, coords: [-73.933, 11.300] },
-  { nombre: 'Ciudad Perdida', info: 'Aventura arqueológica', precio: 100, activo: false, coords: [-73.999, 11.037] }
+  { id: 1, nombre: 'Playa Blanca', info: 'Arena blanca y aguas cristalinas', precio: 50000, activo: true },
+  { id: 2, nombre: 'Parque Tayrona', info: 'Reserva natural con senderos', precio: 80000, activo: true },
+  { id: 3, nombre: 'Museo del Oro', info: 'Historia precolombina', precio: 20000, activo: false }
 ]
