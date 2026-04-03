@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 // Fuente única de datos para todos los lugares turísticos
 export const lugares = [
   // {
@@ -87,3 +88,15 @@ export const lugares = [
 ]
 
 export const getLugarById = (id) => lugares.find(l => l.id == id)
+=======
+const KEY = "lugares"
+
+export const getLugares = () => {
+  const data = localStorage.getItem(KEY)
+  return data ? JSON.parse(data) : []
+}
+
+export const saveLugares = (lugares) => {
+  localStorage.setItem(KEY, JSON.stringify(lugares))
+}
+>>>>>>> Stashed changes

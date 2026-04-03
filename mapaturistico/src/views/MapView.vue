@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 <template>
   <div class="map-page">
     <Navbar @buscar="searchLocation" />
@@ -275,3 +276,34 @@ export default {
   }
 }
 </style>
+=======
+<script setup>
+import { onMounted } from "vue"
+import Map from "ol/Map"
+import View from "ol/View"
+import TileLayer from "ol/layer/Tile"
+import OSM from "ol/source/OSM"
+
+onMounted(() => {
+  new Map({
+    target: "map",
+    layers: [
+      new TileLayer({
+        source: new OSM()
+      })
+    ],
+    view: new View({
+      center: [-8360000, 1230000],
+      zoom: 6
+    })
+  })
+})
+</script>
+
+<template>
+  <div>
+    <h2>Mapa</h2>
+    <div id="map" style="height:500px"></div>
+  </div>
+</template>
+>>>>>>> Stashed changes

@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 <template>
   <div class="card-lugar">
     <img :src="lugar.img" alt="foto" class="imagen" @error="hideImg"/>
@@ -54,3 +55,25 @@ p {
   margin-top: 6px;
 }
 </style>
+=======
+<script setup>
+import { defineProps } from "vue"
+
+const props = defineProps({
+  lugar: Object
+})
+</script>
+
+<template>
+  <div>
+    <h3>{{ props.lugar.nombre }}</h3>
+
+    <p>${{ props.lugar.precio }}</p>
+
+    <p v-if="props.lugar.disponible">Disponible</p>
+    <p v-show="!props.lugar.disponible">No disponible</p>
+
+    <button @click="alert(props.lugar.nombre)">Ver</button>
+  </div>
+</template>
+>>>>>>> Stashed changes

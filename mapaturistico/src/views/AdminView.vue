@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 <template>
   <div class="admin-page" v-if="isAdmin">
     <Navbar />
@@ -164,3 +165,63 @@ h2 {
   }
 }
 </style>
+=======
+<script setup>
+import { ref, onMounted } from "vue"
+import { getLugares, saveLugares } from "../data/lugares"
+import { useRouter } from "vue-router"
+
+const router = useRouter()
+const auth = ref(localStorage.getItem("auth") === "true")
+
+const lugares = ref([])
+const nuevo = ref({ nombre:"", precio:0, disponible:true })
+
+onMounted(() => {
+  lugares.value = getLugares()
+})
+
+const agregar = () => {
+  const item = { ...nuevo.value, id: Date.now() }
+  lugares.value.push(item)
+  saveLugares(lugares.value)
+}
+
+const eliminar = (id) => {
+  lugares.value = lugares.value.filter(l => l.id !== id)
+  saveLugares(lugares.value)
+}
+
+const logout = () => {
+  localStorage.removeItem("auth")
+  router.push("/")
+}
+</script>
+
+<template>
+  <div>
+    <h2>Admin</h2>
+
+    <div v-if="auth">
+      <input v-model="nuevo.nombre" placeholder="Nombre" />
+      <input v-model="nuevo.precio" type="number" />
+
+      <label>
+        <input type="checkbox" v-model="nuevo.disponible" />
+        Disponible
+      </label>
+
+      <button @click="agregar">Agregar</button>
+
+      <div v-for="l in lugares" :key="l.id">
+        {{ l.nombre }} - ${{ l.precio }}
+        <button @click="eliminar(l.id)">X</button>
+      </div>
+
+      <button @click="logout">Salir</button>
+    </div>
+
+    <p v-else>No autorizado</p>
+  </div>
+</template>
+>>>>>>> Stashed changes

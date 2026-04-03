@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 <template>
   <div class="home">
     <Navbar />
@@ -245,3 +246,47 @@ export default {
 .admin-link { color: rgba(255,255,255,.4); font-size: 12px; text-decoration: none; }
 .admin-link:hover { color: rgba(255,255,255,.7); }
 </style>
+=======
+<script setup>
+import { ref, onMounted } from "vue"
+import { getLugares } from "../data/lugares"
+import CardLugar from "../components/CardLugar.vue"
+import SearchBox from "../components/SearchBox.vue"
+
+const lista = ref([])
+const filtrados = ref([])
+
+onMounted(() => {
+  lista.value = getLugares()
+  filtrados.value = lista.value
+})
+
+const filtrar = (t) => {
+  filtrados.value = lista.value.filter(l =>
+    l.nombre.toLowerCase().includes(t.toLowerCase())
+  )
+}
+</script>
+
+<template>
+  <div>
+    <h1>Mapa Turístico 2026</h1>
+
+    <router-link to="/mapa">
+      <button>Explorar</button>
+    </router-link>
+
+    <SearchBox @buscar="filtrar" />
+
+    <TransitionGroup name="fade" tag="div">
+      <CardLugar
+        v-for="l in filtrados"
+        :key="l.id"
+        :lugar="l"
+      />
+    </TransitionGroup>
+
+    <router-link to="/login">Admin</router-link>
+  </div>
+</template>
+>>>>>>> Stashed changes

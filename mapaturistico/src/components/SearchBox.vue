@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 <template>
   <div class="search-box">
     <input
@@ -97,3 +98,20 @@ export default {
   background: #005fa3;
 }
 </style>
+=======
+<script setup>
+import { ref, defineEmits } from "vue"
+
+const texto = ref("")
+const emit = defineEmits(["buscar"])
+
+const buscar = () => emit("buscar", texto.value)
+</script>
+
+<template>
+  <div>
+    <input v-model="texto" placeholder="Buscar..." />
+    <button @click="buscar">Buscar</button>
+  </div>
+</template>
+>>>>>>> Stashed changes
