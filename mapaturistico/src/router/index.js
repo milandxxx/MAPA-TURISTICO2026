@@ -1,37 +1,14 @@
-<<<<<<< Updated upstream
-import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import MapView from '../views/MapView.vue'
-import LoginView from '../views/LoginView.vue'
-import AdminPanelView from '../views/AdminPanelView.vue'
+import { createRouter, createWebHistory} from 'vue-router';
+import HomeView from '../views/HomeView.vue';
+import MappView from '../views/MappView.vue';
+import LoginView from '../views/LoginView.vue';
+import LugarView from '../views/LugarView.vue';
+import AdminView from '../views/AdminView.vue';
 
 const routes = [
-  { path: '/', name: 'home', component: HomeView },
-  { path: '/mapa', name: 'mapa', component: MapView },
-  { path: '/login', name: 'login', component: LoginView },
-  { path: '/admin', name: 'admin', component: AdminPanelView }
-=======
-import { createRouter, createWebHistory } from "vue-router"
-
-import HomeView from "../views/HomeView.vue"
-import MapView from "../views/MapView.vue"
-import LoginPage from "../views/LoginPage.vue"
-import AdminView from "../views/AdminView.vue"
-
-const routes = [
-  { path: "/", component: HomeView },
-  { path: "/mapa", component: MapView },
-  { path: "/login", component: LoginPage },
-  { path: "/admin", component: AdminView }
->>>>>>> Stashed changes
+  { path: '/', name: 'Home', component: HomeView },
+  { path: '/mapa', name: 'Mapa', component: MappView },
+  { path: '/login', name: 'Login', component: LoginView },
+  // { path: '/lugar', name: 'Lugar', component: LugarView },
+  { path: '/admin', name: 'Admin', component: AdminView }
 ]
-
-export default createRouter({
-  history: createWebHistory(),
-  routes
-})
-<<<<<<< Updated upstream
-
-export default router
-=======
->>>>>>> Stashed changes
