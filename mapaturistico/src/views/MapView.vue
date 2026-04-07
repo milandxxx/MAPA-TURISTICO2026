@@ -1,309 +1,206 @@
-<<<<<<< Updated upstream
 <template>
-  <div class="map-page">
-    <Navbar @buscar="searchLocation" />
-    <div id="map" class="map-container"></div>
-    <div v-show="mostrarLista" class="lista-lugares">
-      <ul>
-        <li v-for="lugar in lugares" :key="lugar.nombre">
-          <button @click="centrarLugar(lugar)">{{ lugar.nombre }}</button>
-        </li>
-      </ul>
+  <div class="map-container">
+
+    <div class="top-bar">
+      <input v-model="busqueda" placeholder="Buscar lugares" />
+      <div class="results" v-if="busqueda">
+        <div v-for="l in filtrados" :key="l.id" @click="irLugar(l)">
+          {{ l.nombre }}
+        </div>
+      </div>
     </div>
-    <div id="popup" class="ol-popup">
-      <a href="#" id="popup-closer" class="ol-popup-closer">✖</a>
-      <div id="popup-content"></div>
+
+    <div class="controls">
+      <button @click="zoomIn">+</button>
+      <button @click="zoomOut">-</button>
+      <button @click="miUbicacion">o</button>
     </div>
+
+    <div id="map" class="map"></div>
+
+    <div class="card" v-if="seleccionado">
+      <h3>{{ seleccionado.nombre }}</h3>
+      <p>$ {{ seleccionado.precio }}</p>
+      <span>{{ seleccionado.disponible ? 'Disponible' : 'No disponible' }}</span>
+    </div>
+
   </div>
 </template>
 
-<script>
-import { Map, View, Overlay } from 'ol'
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useLugares } from '../store/lugaresStore'
+
+import Map from 'ol/Map'
+import View from 'ol/View'
 import TileLayer from 'ol/layer/Tile'
 import OSM from 'ol/source/OSM'
-import { fromLonLat } from 'ol/proj'
-import VectorLayer from 'ol/layer/Vector'
-import VectorSource from 'ol/source/Vector'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
-import { Style, Icon } from 'ol/style'
-import Navbar from "../components/Navbar.vue"
+import VectorSource from 'ol/source/Vector'
+import VectorLayer from 'ol/layer/Vector'
+import { fromLonLat } from 'ol/proj'
 
-export default {
-  name: "MapView",
-  components: { Navbar },
-  data() {
-    return {
-      mapInstance: null,
-      vectorLayer: null,
-      mostrarLista: false,
-      lugares: [
-        {
-          nombre: "El Rodadero",
-          descripcion: "Playa urbana con ambiente turístico. Acceso libre.",
-          precio: "Acceso libre. Carpas desde 20.000 COP. Acuario: 35.000 COP",
-          seguridad: "Alta",
-          coords: [-74.215, 11.209]
-        },
-        {
-          nombre: "Minca",
-          descripcion: "Montaña con cascadas y café.",
-          precio: "Tour desde 50.000 COP",
-          seguridad: "Media",
-          coords: [-74.118, 11.146]
-        },
-        {
-          nombre: "Parque Tayrona",
-          descripcion: "Parque nacional con playas vírgenes.",
-          precio: "Entrada desde 20.000 COP",
-          seguridad: "Alta",
-          coords: [-73.943, 11.3]
-        }
-      ]
-    }
-  },
-  mounted() {
-    this.vectorLayer = new VectorLayer({ source: new VectorSource() })
+const { lugares } = useLugares()
 
-    const map = new Map({
-      target: 'map',
-      layers: [
-        new TileLayer({ source: new OSM() }),
-        this.vectorLayer
-      ],
-      view: new View({
-        center: fromLonLat([-74.2, 11.24]),
-        zoom: 12
+const busqueda = ref('')
+const seleccionado = ref(null)
+
+let map
+let view
+
+const filtrados = computed(() =>
+  lugares.value.filter(l =>
+    l.nombre.toLowerCase().includes(busqueda.value.toLowerCase())
+  )
+)
+
+onMounted(() => {
+  const source = new VectorSource()
+
+  lugares.value.forEach(l => {
+    if (!l.lat || !l.lon) return
+
+    source.addFeature(
+      new Feature({
+        geometry: new Point(fromLonLat([Number(l.lon), Number(l.lat)])),
+        data: l
       })
+    )
+  })
+
+  const layer = new VectorLayer({ source })
+
+  view = new View({
+    center: fromLonLat([-74.199, 11.266]),
+    zoom: 12
+  })
+
+  map = new Map({
+    target: 'map',
+    layers: [
+      new TileLayer({ source: new OSM() }),
+      layer
+    ],
+    view
+  })
+
+  map.on('click', (e) => {
+    map.forEachFeatureAtPixel(e.pixel, f => {
+      seleccionado.value = f.get('data')
     })
+  })
 
-    const container = document.getElementById('popup')
-    const content = document.getElementById('popup-content')
-    const closer = document.getElementById('popup-closer')
+  if (!navigator.geolocation) return
 
-    const overlay = new Overlay({
-      element: container,
-      autoPan: true,
-      autoPanAnimation: { duration: 150 }
-    })
-    map.addOverlay(overlay)
+  navigator.geolocation.getCurrentPosition(
+    () => {},
+    () => {}
+  )
+})
 
-    closer.onclick = function() {
-      overlay.setPosition(undefined)
-      closer.blur()
-      return false
-    }
+const irLugar = (l) => {
+  if (!l.lat || !l.lon) return
 
-    map.on('click', (evt) => {
-      const feature = map.forEachFeatureAtPixel(evt.pixel, f => f)
-      if (feature) {
-        const coords = feature.getGeometry().getCoordinates()
-        overlay.setPosition(coords)
+  view.animate({
+    center: fromLonLat([Number(l.lon), Number(l.lat)]),
+    zoom: 15,
+    duration: 800
+  })
 
-        content.innerHTML = `
-          <div class="popup-card">
-            <div class="popup-info">
-              <h3>${feature.get('nombre') || ''}</h3>
-              ${feature.get('descripcion') ? `<p>${feature.get('descripcion')}</p>` : ''}
-              ${feature.get('precio') ? `<p><strong>Precio:</strong> ${feature.get('precio')}</p>` : ''}
-              ${feature.get('seguridad') ? `<p><strong>Seguridad:</strong> ${feature.get('seguridad')}</p>` : ''}
-            </div>
-          </div>
-        `
-      } else {
-        overlay.setPosition(undefined)
-      }
-    })
+  seleccionado.value = l
+  busqueda.value = ''
+}
 
-    this.mapInstance = map
-  },
-  methods: {
-    centrarLugar(lugar) {
-      const feature = new Feature({
-        geometry: new Point(fromLonLat(lugar.coords)),
-        nombre: lugar.nombre,
-        descripcion: lugar.descripcion,
-        precio: lugar.precio,
-        seguridad: lugar.seguridad
-      })
-      feature.setStyle(new Style({
-        image: new Icon({
-          src: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-          scale: 0.05,
-          anchor: [0.5, 1]
-        })
-      }))
+const zoomIn = () => view.setZoom(view.getZoom() + 1)
+const zoomOut = () => view.setZoom(view.getZoom() - 1)
 
-      this.vectorLayer.getSource().clear()
-      this.vectorLayer.getSource().addFeature(feature)
+const miUbicacion = () => {
+  if (!navigator.geolocation) return
 
-      this.mapInstance.getView().animate({
-        center: fromLonLat(lugar.coords),
-        zoom: 15,
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const coords = fromLonLat([
+        pos.coords.longitude,
+        pos.coords.latitude
+      ])
+
+      view.animate({
+        center: coords,
+        zoom: 14,
         duration: 1000
       })
     },
-
-    searchLocation(query) {
-      if (!query) return
-      const lugarLocal = this.lugares.find(l =>
-        l.nombre.toLowerCase() === query.toLowerCase()
-      )
-      if (lugarLocal) {
-        this.centrarLugar(lugarLocal)
-      } else {
-        alert(`"${query}" no está en el catálogo`)
-      }
-    }
-  }
+    () => {}
+  )
 }
 </script>
 
 <style>
-.map-page {
-  display: flex;
-  flex-direction: column;
+.map-container {
+  position: relative;
   height: 100vh;
-  font-family: 'Roboto', Arial, sans-serif;
 }
 
-.map-container {
-  flex: 1;
+.map {
   width: 100%;
   height: 100%;
-  position: relative;
-  background: #e5e5e5;
 }
-.lista-lugares {
+
+.top-bar {
   position: absolute;
-  top: 60px;
-  left: 10px;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320px;
+  z-index: 10;
+}
+
+.top-bar input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 20px;
+}
+
+.results {
   background: white;
-  padding: 8px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  z-index: 1000;
+  margin-top: 5px;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
-.lista-lugares ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.lista-lugares li {
-  margin: 4px 0;
-}
-
-.lista-lugares button {
-  background: #f5f5f5;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 10px;
+.results div {
+  padding: 10px;
   cursor: pointer;
-  font-size: 14px;
-  transition: background 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
-.lista-lugares button:hover {
-  background: #1976d2;
-  color: white;
+.results div:hover {
+  background: #f3f4f6;
 }
-.popup-card {
+
+.controls {
+  position: absolute;
+  right: 15px;
+  top: 100px;
   display: flex;
   flex-direction: column;
-  width: 280px;
-  border-radius: 12px;
-  overflow: hidden;
-  font-family: 'Roboto', Arial, sans-serif;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  background: #fff;
-  animation: fadeIn 0.2s ease-in-out;
+  gap: 10px;
 }
 
-.popup-info {
-  padding: 12px;
+.controls button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
 }
 
-.popup-info h3 {
-  margin: 0 0 8px;
-  font-size: 18px;
-  color: #202124;
-}
-
-.popup-info p {
-  margin: 4px 0;
-  font-size: 14px;
-  color: #555;
-}
-.ol-popup {
+.card {
   position: absolute;
-  border: none;
-  bottom: 12px;
-  left: -50px;
-  background: transparent;
-}
-
-.ol-popup-closer {
-  text-decoration: none;
-  position: absolute;
-  top: 2px;
-  right: 8px;
-  font-size: 18px;
-  color: #666;
-  transition: color 0.2s ease-in-out;
-}
-
-.ol-popup-closer:hover {
-  color: #1976d2;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@media (max-width: 600px) {
-  .lista-lugares {
-    top: 50px;
-    left: 5px;
-    padding: 6px;
-  }
-  .lista-lugares button {
-    font-size: 12px;
-    padding: 4px 8px;
-  }
-  .popup-card {
-    width: 220px;
-  }
+  bottom: 20px;
+  left: 20px;
+  background: white;
+  color: black;
+  padding: 15px;
+  border-radius: 10px;
+  min-width: 200px;
 }
 </style>
-=======
-<script setup>
-import { onMounted } from "vue"
-import Map from "ol/Map"
-import View from "ol/View"
-import TileLayer from "ol/layer/Tile"
-import OSM from "ol/source/OSM"
-
-onMounted(() => {
-  new Map({
-    target: "map",
-    layers: [
-      new TileLayer({
-        source: new OSM()
-      })
-    ],
-    view: new View({
-      center: [-8360000, 1230000],
-      zoom: 6
-    })
-  })
-})
-</script>
-
-<template>
-  <div>
-    <h2>Mapa</h2>
-    <div id="map" style="height:500px"></div>
-  </div>
-</template>
->>>>>>> Stashed changes

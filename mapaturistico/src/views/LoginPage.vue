@@ -1,13 +1,11 @@
 <template>
-  <div class='login'>
-    <h2>Login</h2>
-
-    <input v-model='user' placeholder='Usuario' />
-    <input v-model='pass' type='password' placeholder='Contraseña' />
-
-    <button @click='login'>Entrar</button>
-
-    <p v-if='error' class='error'>{{ error }}</p>
+  <div class="login">
+    <div class="box">
+      <input v-model="user" placeholder="Usuario">
+      <input v-model="pass" type="password" placeholder="ContraseÃ±a">
+      <button @click="login">Entrar</button>
+      <p v-if="error">{{ error }}</p>
+    </div>
   </div>
 </template>
 
@@ -20,7 +18,7 @@ const pass = ref('')
 const error = ref('')
 const router = useRouter()
 
-function login() {
+const login = () => {
   error.value = ''
 
   if (!user.value || !pass.value) {
@@ -29,14 +27,10 @@ function login() {
   }
 
   if (user.value === 'admin' && pass.value === '1234') {
-    localStorage.setItem('auth','true')
+    localStorage.setItem('auth', 'true')
     router.push('/admin')
   } else {
     error.value = 'Credenciales incorrectas'
   }
 }
 </script>
-
-<style scoped>
-.error { color:red; }
-</style>

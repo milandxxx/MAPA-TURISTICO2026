@@ -1,79 +1,44 @@
-<<<<<<< Updated upstream
 <template>
-  <div class="card-lugar">
-    <img :src="lugar.img" alt="foto" class="imagen" @error="hideImg"/>
+  <div class="card">
     <h3>{{ lugar.nombre }}</h3>
-    <p>{{ lugar.info }}</p>
-
-    <div class="reseñas">
-      <h4>Reseñas</h4>
-      <div v-if="lugar.reseñas && lugar.reseñas.length">
-        <div v-for="(r, i) in lugar.reseñas" :key="i">
-          ⭐ {{ r.rating }} - {{ r.comentario }}
-        </div>
-      </div>
-      <div v-else>
-        <em>Sin reseñas aún</em>
-      </div>
-    </div>
+    <p class="precio">$ {{ lugar.precio }}</p>
+    <span :class="lugar.disponible ? 'ok' : 'off'">
+      {{ lugar.disponible ? 'Disponible' : 'No disponible' }}
+    </span>
+    <button @click="ir">Ver mapa</button>
   </div>
 </template>
 
-<script>
-export default {
-  name: "CardLugar",
-  props: { lugar: Object },
-  methods: {
-    hideImg(e) { e.target.style.display = 'none' }
-  }
-}
+<script setup>
+import { useRouter } from 'vue-router'
+
+const props = defineProps({ lugar: Object })
+const router = useRouter()
+
+const ir = () => router.push('/mapa')
 </script>
 
-<style scoped>
-.card-lugar {
-  width: 260px;
-  font-family: Roboto, Arial, sans-serif;
+<style>
+.card {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid #334155;
 }
-.imagen {
-  width: 100%;
-  height: 140px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 8px;
+
+.precio {
+  color: #3b82f6;
 }
-h3 {
-  font-size: 16px;
-  font-weight: 600;
-  margin: 6px 0;
+
+.ok {
+  background: #22c55e;
+  padding: 4px 8px;
+  border-radius: 10px;
 }
-p {
-  font-size: 13px;
-  color: #555;
-}
-.reseñas {
-  font-size: 12px;
-  margin-top: 6px;
+
+.off {
+  background: #ef4444;
+  padding: 4px 8px;
+  border-radius: 10px;
 }
 </style>
-=======
-<script setup>
-import { defineProps } from "vue"
-
-const props = defineProps({
-  lugar: Object
-})
-</script>
-
-<template>
-  <div>
-    <h3>{{ props.lugar.nombre }}</h3>
-
-    <p>${{ props.lugar.precio }}</p>
-
-    <p v-if="props.lugar.disponible">Disponible</p>
-    <p v-show="!props.lugar.disponible">No disponible</p>
-
-    <button @click="alert(props.lugar.nombre)">Ver</button>
-  </div>
-</template>
->>>>>>> Stashed changes
