@@ -60,7 +60,7 @@
 
 <script>
 import Navbar from '../components/Navbar.vue'
-import { getLugarById } from '../data/lugares.js'
+import { getLugarById } from '../data/lugaresStore.js'
 
 export default {
   name: 'LugarView',
