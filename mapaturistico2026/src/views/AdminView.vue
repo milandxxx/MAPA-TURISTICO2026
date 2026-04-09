@@ -1,15 +1,30 @@
 <template>
 <div>
-<h2>Admin</h2>
-<button @click='logout'>Salir</button>
+<input v-model='nombre'/>
+<button @click='crear'>Crear</button>
+
+<div v-for='l in lugares' :key='l.id'>
+{{l.nombre}} <button @click='eliminar(l.id)'>X</button>
+</div>
 </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
-const r=useRouter()
-const logout=()=>{
-localStorage.removeItem('auth')
-r.push('/')
+import { ref,onMounted } from 'vue'
+import axios from 'axios'
+import { useLugares } from '../store/lugaresStore'
+
+const { lugares,cargar } = useLugares()
+const nombre = ref('')
+onMounted(cargar)
+
+const crear = async()=>{
+await axios.post('http://127.0.0.1:8000/lugares',{nombre})
+cargar()
+}
+
+const eliminar = async(id)=>{
+await axios.delete(http://127.0.0.1:8000/lugares/)
+cargar()
 }
 </script>
