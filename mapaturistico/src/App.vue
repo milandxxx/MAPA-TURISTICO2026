@@ -1,11 +1,10 @@
-<template>
-  <router-view v-slot="{ Component }">
-    <transition name="page">
-      <component :is="Component" />
-    </transition>
-  </router-view>
-</template>
+<script setup>
+import Toast from './components/ui/Toast.vue'
+import Loader from './components/ui/Loader.vue'
+</script>
 
-<style>
-@import './assets/animations.css';
-</style>
+<template>
+<Loader/>
+<Toast/>
+<router-view/>
+</template>

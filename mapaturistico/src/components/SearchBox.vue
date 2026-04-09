@@ -1,20 +1,6 @@
-<template>
-  <div class="search">
-    <input v-model="texto" placeholder="Buscar" />
-    <button @click="emit('buscar', texto)">Buscar</button>
-  </div>
-</template>
-
+<template><input @input='h' placeholder='Buscar'/></template>
 <script setup>
-import { ref } from 'vue'
-const texto = ref('')
-const emit = defineEmits(['buscar'])
+import { debounce } from '../utils/debounce'
+const emit=defineEmits(['buscar'])
+const h=debounce(e=>emit('buscar',e.target.value),300)
 </script>
-
-<style>
-.search {
-  display: flex;
-  gap: 10px;
-  margin: 20px 0;
-}
-</style>

@@ -35,4 +35,4 @@ input {
 input:focus {
   outline: none;
   border-color: #3b82f6;
-}
+}.dark{background:#020617;color:white;}
