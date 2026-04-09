@@ -1,36 +1,20 @@
 <template>
-  <div class="login">
-    <div class="box">
-      <input v-model="user" placeholder="Usuario">
-      <input v-model="pass" type="password" placeholder="Contraseña">
-      <button @click="login">Entrar</button>
-      <p v-if="error">{{ error }}</p>
-    </div>
-  </div>
+<div>
+<input v-model='u'/>
+<input v-model='p' type='password'/>
+<button @click='login'>Entrar</button>
+</div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-
-const user = ref('')
-const pass = ref('')
-const error = ref('')
-const router = useRouter()
-
-const login = () => {
-  error.value = ''
-
-  if (!user.value || !pass.value) {
-    error.value = 'Campos obligatorios'
-    return
-  }
-
-  if (user.value === 'admin' && pass.value === '1234') {
-    localStorage.setItem('auth', 'true')
-    router.push('/admin')
-  } else {
-    error.value = 'Credenciales incorrectas'
-  }
+const u=ref(''),p=ref('')
+const r=useRouter()
+const login=()=>{
+if(u.value==='admin'&&p.value==='1234'){
+localStorage.setItem('auth','true')
+r.push('/admin')
+}
 }
 </script>
