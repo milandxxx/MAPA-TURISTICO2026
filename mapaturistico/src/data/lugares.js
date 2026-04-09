@@ -1,5 +1,5 @@
-export default [
-  { id: 1, nombre: 'Playa Blanca', info: 'Arena blanca y aguas cristalinas', precio: 50000, activo: true },
-  { id: 2, nombre: 'Parque Tayrona', info: 'Reserva natural con senderos', precio: 80000, activo: true },
-  { id: 3, nombre: 'Museo del Oro', info: 'Historia precolombina', precio: 20000, activo: false }
+export const lugares = [
+{ id:1,nombre:'Playa',lat:11.24,lon:-74.21 },
+{ id:2,nombre:'Centro',lat:11.23,lon:-74.20 },
+{ id:3,nombre:'Mirador',lat:11.25,lon:-74.22 }
 ]
