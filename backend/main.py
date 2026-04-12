@@ -1,27 +1,95 @@
-from fastapi import FastAPI,Depends,HTTPException
-from sqlalchemy.orm import Session
-from db import engine,Base,get_db
-import models,schemas
+from fastapi import FastAPI
+from db import get_connection
+from schemas import Lugar
 
-app=FastAPI()
-Base.metadata.create_all(bind=engine)
+app = FastAPI()
 
-@app.get('/lugares')
-def get_all(db:Session=Depends(get_db)):
-    return db.query(models.Lugar).all()
+# ============================
+# GET - LISTAR
+# ============================
+@app.get("/lugares")
+def get_lugares():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
 
-@app.post('/lugares')
-def create(lugar:schemas.LugarCreate,db:Session=Depends(get_db)):
-    nuevo=models.Lugar(**lugar.dict())
-    db.add(nuevo)
-    db.commit()
-    db.refresh(nuevo)
-    return nuevo
+    cursor.execute("SELECT * FROM lugares")
+    data = cursor.fetchall()
 
-@app.delete('/lugares/{id}')
-def delete(id:int,db:Session=Depends(get_db)):
-    l=db.query(models.Lugar).filter(models.Lugar.id==id).first()
-    if not l: raise HTTPException(404)
-    db.delete(l)
-    db.commit()
-    return {'ok':True}
+    conn.close()
+    return data
+
+# ============================
+# POST - CREAR
+# ============================
+@app.post("/lugares")
+def create_lugar(lugar: Lugar):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    sql = """
+    INSERT INTO lugares (id, nombre, descripcion, precio, rating, imagen)
+    VALUES (%s, %s, %s, %s, %s, %s)
+    """
+    values = (
+        lugar.id,
+        lugar.nombre,
+        lugar.descripcion,
+        lugar.precio,
+        lugar.rating,
+        lugar.imagen
+    )
+
+    cursor.execute(sql, values)
+    conn.commit()
+    conn.close()
+
+    return {"msg": "creado"}
+
+# ============================
+# PUT - EDITAR
+# ============================
+@app.put("/lugares/{id}")
+def update_lugar(id: int, lugar: Lugar):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    sql = """
+    UPDATE lugares
+    SET nombre=%s, descripcion=%s, precio=%s, rating=%s, imagen=%s
+    WHERE id=%s
+    """
+    values = (
+        lugar.nombre,
+        lugar.descripcion,
+        lugar.precio,
+        lugar.rating,
+        lugar.imagen,
+        id
+    )
+
+    cursor.execute(sql, values)
+    conn.commit()
+    conn.close()
+
+    return {"msg": "actualizado"}
+
+# ============================
+# DELETE - ELIMINAR
+# ============================
+@app.delete("/lugares/{id}")
+def delete_lugar(id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM lugares WHERE id=%s", (id,))
+    conn.commit()
+    conn.close()
+
+    return {"msg": "eliminado"}
+
+# ============================
+# FAVORITO (OPCIONAL)
+# ============================
+@app.put("/favorito/{id}")
+def favorito(id: int):
+    return {"msg": "ok"}
