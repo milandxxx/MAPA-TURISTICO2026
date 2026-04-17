@@ -1,9 +1,11 @@
 <template>
-  <div>
-    <input v-model='user' placeholder='usuario' />
-    <input v-model='pass' type='password' placeholder='contraseña' />
-    <button @click='login'>Entrar</button>
-  </div>
+<div class='login-bg'>
+<div class='login-card'>
+<input v-model='user' placeholder='Usuario'/>
+<input v-model='pass' type='password' placeholder='Contraseña'/>
+<button @click='login'>Entrar</button>
+</div>
+</div>
 </template>
 
 <script setup>
@@ -14,10 +16,13 @@ const user = ref('')
 const pass = ref('')
 const router = useRouter()
 
-const login = () => {
-  if (user.value === 'admin' && pass.value === '1234') {
-    localStorage.setItem('auth', true)
-    router.push('/admin')
-  }
+const login = ()=>{
+localStorage.setItem('user',user.value)
+if(user.value==='admin'&&pass.value==='1234'){
+localStorage.setItem('auth',true)
+router.push('/admin')
+}else{
+router.push('/')
+}
 }
 </script>

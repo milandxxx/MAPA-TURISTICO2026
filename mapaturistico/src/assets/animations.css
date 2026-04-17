@@ -1,2 +1,8 @@
-.card:hover { transform: scale(1.05); transition: 0.3s; }
-button:hover { background: black; color: white; }
+.fade-enter-active { transition:.3s; }
+.fade-enter-from { opacity:0; transform:translateY(10px); }
+
+.list-enter-active { transition:.3s; }
+.list-enter-from { opacity:0; transform:translateY(10px); }
+
+.card { transition:.25s; }
+.card:hover { transform:translateY(-5px); }
