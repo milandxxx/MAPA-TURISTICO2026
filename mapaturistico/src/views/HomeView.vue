@@ -1,25 +1,34 @@
 <template>
-<div class='container'>
-<SearchBox @buscar='filtrar'/>
-<p v-if='store.loading'>Cargando...</p>
-<transition-group name='list' tag='div' class='grid'>
-<CardLugar v-for='l in filtrados' :key='l.id' :lugar='l'/>
-</transition-group>
-</div>
+  <input v-model="search" @input="loadData" placeholder="Buscar..." />
+
+  <div class="grid">
+    <div v-for="l in lugares" :key="l.id" class="card">
+      {{ l.nombre }}
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref,computed,onMounted } from 'vue'
-import { useLugaresStore } from '../store/useLugares'
-import SearchBox from '../components/SearchBox.vue'
-import CardLugar from '../components/CardLugar.vue'
+import { ref, onMounted } from 'vue'
+import useLugares from '../composables/useLugares'
 
-const store = useLugaresStore()
-const filtro = ref('')
+const { lugares, load } = useLugares()
+const search = ref('')
 
-onMounted(()=>store.fetchLugares())
+onMounted(loadData)
 
-const filtrar = t=>filtro.value=t
-
-const filtrados = computed(()=>store.lugares.filter(l=>l.nombre.toLowerCase().includes(filtro.value.toLowerCase())))
+function loadData() {
+  load({ search: search.value })
+}
 </script>
+
+<style scoped>
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+.card {
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+</style>

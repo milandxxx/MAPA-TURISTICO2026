@@ -1,28 +1,37 @@
 <template>
-  <div class='card'>
-    <img :src='lugar.imagen'/>
+  <div class="card" @click="fav" @dblclick="ver">
+    <img :src="lugar.imagen" />
     <h3>{{ lugar.nombre }}</h3>
     <p>{{ lugar.descripcion }}</p>
-    <span>{{ lugar.precio }}</span>
-    <span>? {{ lugar.rating }}</span>
-    <button @click='fav'>{{ esFavorito ? '??':'??' }}</button>
+    <span>${{ lugar.precio }}</span>
   </div>
 </template>
 
 <script setup>
-import { ref,onMounted } from 'vue'
-import { getFavoritos,toggleFavorito } from '../store/favoritos'
+import { toggleFav } from '../store/favoritos'
 
 const props = defineProps(['lugar'])
-const esFavorito = ref(false)
 
-onMounted(async ()=>{
-  const favs = await getFavoritos()
-  esFavorito.value = favs.some(f=>f.lugar_id===props.lugar.id)
-})
+const fav = async () => {
+  await toggleFav(props.lugar.id)
+}
 
-const fav = async ()=>{
-  await toggleFavorito(props.lugar.id)
-  esFavorito.value = !esFavorito.value
+const ver = () => {
+  alert(props.lugar.nombre)
 }
 </script>
+
+<style scoped>
+.card {
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+</style>

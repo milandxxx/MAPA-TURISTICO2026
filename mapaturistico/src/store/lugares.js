@@ -1,7 +1,16 @@
-import axios from 'axios'
-const API = 'http://localhost:8000'
+import api from './api'
 
-export const getLugares = async () => (await axios.get(${API}/lugares)).data
-export const createLugar = async (data) => await axios.post(${API}/lugares, data)
-export const updateLugar = async (id,data) => await axios.put(${API}/lugares/, data)
-export const deleteLugar = async (id) => await axios.delete(${API}/lugares/)
+export const getLugares = (params = {}) =>
+  api.get('/lugares', { params })
+
+export const createLugar = (data) =>
+  api.post('/lugares', data)
+
+export const updateLugar = (id, data) =>
+  api.put(`/lugares/${id}`, data)
+
+export const deleteLugar = (id) =>
+  api.delete(`/lugares/${id}`)
+
+export const toggleFav = (id) =>
+  api.put(`/lugares/${id}/fav`)
