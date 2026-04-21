@@ -3,95 +3,82 @@
 
     <h2>Admin</h2>
 
-    <!-- ALERTAS -->
-    <div v-if="error" class="error">{{ error }}</div>
-    <div v-if="loading" class="loading">Cargando...</div>
-
-    <!-- BUSQUEDA -->
-    <input v-model="search" @input="loadData" placeholder="Buscar..." />
-
-    <!-- FORM -->
     <div class="form">
       <input v-model="form.nombre" placeholder="Nombre" />
-      <input v-model.number="form.precio" placeholder="Precio" />
-      <input v-model="form.categoria" placeholder="Categoría" />
-      <input v-model.number="form.lat" placeholder="Lat" />
-      <input v-model.number="form.lng" placeholder="Lng" />
+      <input v-model="form.desc" placeholder="Desc" />
+      <input v-model="form.precio" placeholder="Precio" />
 
-      <button v-if="!editando" @click="crear">Crear</button>
-      <button v-else @click="actualizar">Actualizar</button>
+      <button @click="guardar">Guardar</button>
     </div>
 
-    <!-- LISTA -->
     <ul>
       <li v-for="l in lugares" :key="l.id">
-        {{ l.nombre }} - ${{ l.precio }}
+        {{ l.nombre }}
 
-        <button @click="editar(l)">✏️</button>
-        <button @click="fav(l.id)">⭐</button>
-        <button @click="remove(l.id)">🗑</button>
+        <button @click="editar(l)">Edit</button>
+        <button @click="eliminar(l.id)">X</button>
       </li>
     </ul>
 
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue'
-import useLugares from '../composables/useLugares'
-import { validateLugar } from '../utils/validate'
+<script>
+import axios from 'axios'
 
-const { lugares, load, create, update, remove, fav, loading, error } = useLugares()
+export default {
+  data() {
+    return {
+      lugares: [],
+      form: { nombre: '', desc: '', precio: 0 },
+      id: null
+    }
+  },
 
-const search = ref('')
-const editando = ref(false)
-const id = ref(null)
+  methods: {
+    async cargar() {
+      const res = await axios.get('http://127.0.0.1:8000/lugares')
+      this.lugares = res.data
+    },
 
-const form = ref({
-  nombre: '',
-  precio: 0,
-  categoria: '',
-  lat: 0,
-  lng: 0
-})
+    async guardar() {
+      // NO QUITAR: decide entre crear o editar
+      if (this.id) {
+        await axios.put(`http://127.0.0.1:8000/lugares/${this.id}`, this.form)
+      } else {
+        await axios.post('http://127.0.0.1:8000/lugares', this.form)
+      }
 
-onMounted(loadData)
+      this.form = { nombre: '', desc: '', precio: 0 }
+      this.id = null
 
-function loadData() {
-  load({ search: search.value })
-}
+      this.cargar()
+    },
 
-async function crear() {
-  const err = validateLugar(form.value)
-  if (err) return alert(err)
+    editar(l) {
+      this.form = { ...l }
+      this.id = l.id
+    },
 
-  await create(form.value)
-  limpiar()
-}
+    async eliminar(id) {
+      await axios.delete(`http://127.0.0.1:8000/lugares/${id}`)
+      this.cargar()
+    }
+  },
 
-function editar(l) {
-  form.value = { ...l }
-  id.value = l.id
-  editando.value = true
-}
-
-async function actualizar() {
-  const err = validateLugar(form.value)
-  if (err) return alert(err)
-
-  await update(id.value, form.value)
-  limpiar()
-}
-
-function limpiar() {
-  form.value = { nombre: '', precio: 0, categoria: '', lat: 0, lng: 0 }
-  editando.value = false
+  mounted() {
+    this.cargar()
+  }
 }
 </script>
 
-<style scoped>
-.admin { padding: 20px }
-.form { display: flex; gap: 10px; margin: 10px 0 }
-.error { color: red }
-.loading { color: blue }
+<style>
+.admin {
+  padding: 20px;
+}
+
+input {
+  margin: 5px;
+  padding: 5px;
+}
 </style>

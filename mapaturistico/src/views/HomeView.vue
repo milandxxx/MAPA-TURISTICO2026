@@ -1,34 +1,59 @@
 <template>
-  <input v-model="search" @input="loadData" placeholder="Buscar..." />
+  <div class="home">
 
-  <div class="grid">
-    <div v-for="l in lugares" :key="l.id" class="card">
-      {{ l.nombre }}
+    <div v-if="loading" class="loader">
+      <div class="dot"></div>
+      <p>Cargando...</p>
     </div>
+
+    <div v-else>
+      <h1>Mapa Turístico</h1>
+      <p>Explora lugares desde el mapa</p>
+
+      <router-link to="/map">
+        <button>Ver Mapa</button>
+      </router-link>
+    </div>
+
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue'
-import useLugares from '../composables/useLugares'
-
-const { lugares, load } = useLugares()
-const search = ref('')
-
-onMounted(loadData)
-
-function loadData() {
-  load({ search: search.value })
+<script>
+export default {
+  data() {
+    return { loading: true }
+  },
+  mounted() {
+    setTimeout(() => {
+      this.loading = false
+    }, 1500)
+  }
 }
 </script>
 
-<style scoped>
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+<style>
+.home {
+  text-align: center;
+  margin-top: 80px;
 }
-.card {
-  padding: 10px;
-  border: 1px solid #ccc;
+
+.loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dot {
+  width: 20px;
+  height: 20px;
+  background: black;
+  border-radius: 50%;
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+  0% { transform: translateY(0) }
+  50% { transform: translateY(-15px) }
+  100% { transform: translateY(0) }
 }
 </style>

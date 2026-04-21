@@ -1,191 +1,207 @@
 <template>
-  <div class="container">
+  <div>
 
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-      <input v-model="search" @input="filtrar" placeholder="Buscar..." />
-
-      <div
-        v-for="l in filtrados"
-        :key="l.id"
-        class="item"
-        @click="seleccionarDestino(l)"
-      >
-        {{ l.nombre }}
-      </div>
-
-      <button @click="usarUbicacion">Mi ubicación</button>
-      <button @click="calcularRuta">Calcular ruta</button>
+    <div v-if="loading" class="map-loader">
+      <div class="map-bg"></div>
+      <div class="pin"></div>
+      <p>Buscando...</p>
     </div>
 
-    <!-- MAPA -->
+    <div class="search">
+      <input v-model="search" @keydown.enter="buscar" placeholder="Buscar lugar..." />
+      <button @click="buscar">Buscar</button>
+    </div>
+
     <div id="map" class="map"></div>
 
-    <!-- CARD -->
-    <div v-if="seleccionado" class="card">
-      <h3>{{ seleccionado.nombre }}</h3>
-      <p>{{ seleccionado.descripcion }}</p>
-      <span>${{ seleccionado.precio }}</span>
+    <div v-if="selected" class="card">
+      <h3>{{ selected.nombre }}</h3>
+      <p>{{ selected.desc }}</p>
+      <button @click="crearRuta">Ir</button>
+      <button @click="selected=null">X</button>
     </div>
 
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, watch } from 'vue'
-import useLugares from '../composables/useLugares'
+<script>
+import axios from 'axios'
 
 import Map from 'ol/Map'
 import View from 'ol/View'
 import TileLayer from 'ol/layer/Tile'
 import OSM from 'ol/source/OSM'
-import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
-
+import VectorLayer from 'ol/layer/Vector'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import LineString from 'ol/geom/LineString'
 import { fromLonLat } from 'ol/proj'
 
-import axios from 'axios'
+export default {
+  data() {
+    return {
+      map: null,
+      source: new VectorSource(),
+      routeSource: new VectorSource(),
+      selected: null,
+      userCoords: null,
+      search: '',
+      loading: false
+    }
+  },
 
-// 🔹 STATE
-const { lugares, load } = useLugares()
+  methods: {
+    async buscar() {
+      if (!this.search) return
 
-const filtrados = ref([])
-const seleccionado = ref(null)
+      this.loading = true
 
-const origen = ref(null)
-const destino = ref(null)
+      try {
+        const res = await axios.get('http://127.0.0.1:8000/lugares', {
+          params: { search: this.search }
+        })
 
-const search = ref('')
+        // NO QUITAR: evita duplicar puntos
+        this.source.clear()
 
-// 🔹 MAP
-let map
-let source = new VectorSource()
-let layer = new VectorLayer({ source })
+        res.data.forEach(l => {
+          this.source.addFeature(
+            new Feature({
+              geometry: new Point(fromLonLat([l.lng, l.lat])),
+              data: l
+            })
+          )
+        })
 
-// 🔥 RENDER MARCADORES (CLAVE)
-const renderMarkers = () => {
-  source.clear()
-
-  filtrados.value.forEach(l => {
-    const marker = new Feature({
-      geometry: new Point(fromLonLat([l.lng, l.lat])),
-      data: l
-    })
-
-    source.addFeature(marker)
-  })
-}
-
-// 🔹 FILTRO
-const filtrar = () => {
-  filtrados.value = lugares.value.filter(l =>
-    l.nombre.toLowerCase().includes(search.value.toLowerCase())
-  )
-}
-
-// 🔹 SELECCION
-const seleccionarDestino = (l) => {
-  seleccionado.value = l
-  destino.value = [l.lng, l.lat]
-}
-
-// 🔹 GEOLOCALIZACIÓN
-const usarUbicacion = () => {
-  navigator.geolocation.getCurrentPosition(pos => {
-    origen.value = [pos.coords.longitude, pos.coords.latitude]
-  })
-}
-
-// 🔹 RUTA
-const calcularRuta = async () => {
-  if (!origen.value || !destino.value) return
-
-  const res = await axios.get(
-    `http://router.project-osrm.org/route/v1/driving/${origen.value[0]},${origen.value[1]};${destino.value[0]},${destino.value[1]}?overview=full&geometries=geojson`
-  )
-
-  const coords = res.data.routes[0].geometry.coordinates
-
-  const line = new Feature({
-    geometry: new LineString(coords.map(c => fromLonLat(c)))
-  })
-
-  source.addFeature(line)
-}
-
-// 🔹 INIT
-onMounted(async () => {
-  await load()
-  filtrados.value = lugares.value
-
-  map = new Map({
-    target: 'map',
-    layers: [
-      new TileLayer({ source: new OSM() }),
-      layer
-    ],
-    view: new View({
-      center: fromLonLat([-74.2, 11.24]),
-      zoom: 13
-    })
-  })
-
-  renderMarkers()
-
-  // CLICK EN MARCADOR
-  map.on('click', e => {
-    map.forEachFeatureAtPixel(e.pixel, f => {
-      const data = f.get('data')
-      if (data) {
-        seleccionado.value = data
-        destino.value = [data.lng, data.lat]
+      } catch (e) {
+        console.log('error')
       }
-    })
-  })
-})
 
-// 🔥 REACTIVIDAD AUTOMÁTICA
-watch(filtrados, () => {
-  renderMarkers()
-})
+      this.loading = false
+    },
+
+    getUser() {
+      // NO QUITAR: necesario para rutas
+      navigator.geolocation.getCurrentPosition(pos => {
+        this.userCoords = [pos.coords.longitude, pos.coords.latitude]
+      })
+    },
+
+    async crearRuta() {
+      if (!this.userCoords || !this.selected) return
+
+      const [lng1, lat1] = this.userCoords
+      const [lng2, lat2] = [this.selected.lng, this.selected.lat]
+
+      const url = `https://router.project-osrm.org/route/v1/driving/${lng1},${lat1};${lng2},${lat2}?overview=full&geometries=geojson`
+
+      const res = await axios.get(url)
+
+      const coords = res.data.routes[0].geometry.coordinates
+
+      const line = new LineString(coords.map(c => fromLonLat(c)))
+
+      // NO QUITAR: limpia rutas anteriores
+      this.routeSource.clear()
+
+      this.routeSource.addFeature(new Feature({ geometry: line }))
+    },
+
+    initMap() {
+      const vectorLayer = new VectorLayer({ source: this.source })
+      const routeLayer = new VectorLayer({ source: this.routeSource })
+
+      // NO CAMBIAR ID
+      this.map = new Map({
+        target: 'map',
+        layers: [
+          new TileLayer({ source: new OSM() }),
+          vectorLayer,
+          routeLayer
+        ],
+        view: new View({
+          center: fromLonLat([-74.2, 11.2]),
+          zoom: 12
+        })
+      })
+
+      // NO QUITAR: click en marcador
+      this.map.on('singleclick', (evt) => {
+        this.map.forEachFeatureAtPixel(evt.pixel, (feature) => {
+          const data = feature.get('data')
+          if (data) this.selected = data
+        })
+      })
+    }
+  },
+
+  mounted() {
+    this.initMap()
+    this.getUser()
+  }
+}
 </script>
 
-<style scoped>
-.container {
-  display: flex;
-}
-
-.sidebar {
-  width: 260px;
-  background: #fff;
-  padding: 10px;
-  height: 100vh;
-  overflow-y: auto;
-}
-
-.item {
-  padding: 6px;
-  cursor: pointer;
-}
-
-.item:hover {
-  background: #eee;
-}
-
+<style>
 .map {
   width: 100%;
   height: 100vh;
 }
 
-.card {
+.search {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  background: white;
+  padding: 5px;
+  z-index: 2;
+}
+
+.map-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.map-bg {
   position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image:
+    linear-gradient(#ccc 1px, transparent 1px),
+    linear-gradient(90deg, #ccc 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.2;
+}
+
+.pin {
+  width: 15px;
+  height: 15px;
+  background: red;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.card {
+  position: fixed;
   bottom: 20px;
-  left: 280px;
+  left: 20px;
   background: white;
   padding: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  border: 1px solid gray;
 }
 </style>

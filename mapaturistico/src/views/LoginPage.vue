@@ -1,40 +1,52 @@
 <template>
   <div class="login">
-    <input v-model="user" placeholder="usuario" />
-    <input v-model="pass" type="password" />
+
+    <h2>Login</h2>
+
+    <input v-model="user" placeholder="Usuario" />
+    <input v-model="pass" type="password" placeholder="Contraseña" />
+
     <button @click="login">Entrar</button>
+
+    <p v-if="error">{{ error }}</p>
+
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+<script>
+export default {
+  data() {
+    return {
+      user: '',
+      pass: '',
+      error: null
+    }
+  },
 
-const router = useRouter()
-
-const user = ref('')
-const pass = ref('')
-
-const login = () => {
-  if (user.value === 'admin' && pass.value === '1234') {
-    localStorage.setItem('auth', true)
-    router.push('/admin')
+  methods: {
+    login() {
+      // NO CAMBIAR: control simple de acceso
+      if (this.user === 'admin' && this.pass === '1234') {
+        localStorage.setItem('auth', 'true')
+        this.$router.push('/admin')
+      } else {
+        this.error = 'Datos incorrectos'
+      }
+    }
   }
 }
 </script>
 
-<style scoped>
+<style>
 .login {
-  padding: 20px;
+  width: 250px;
+  margin: 60px auto;
+  text-align: center;
 }
 
 input {
   display: block;
-  margin: 10px 0;
+  margin: 10px auto;
   padding: 8px;
-}
-
-button {
-  padding: 10px;
 }
 </style>
