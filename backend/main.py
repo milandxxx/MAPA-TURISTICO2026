@@ -1,23 +1,17 @@
+from models import LugarModel
 from fastapi import FastAPI
-from db import get_connection
-from schemas import Lugar
-
-app = FastAPI()
-
-# ============================
-# GET - LISTAR
-# ============================
 @app.get("/lugares")
 def get_lugares():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute("SELECT * FROM lugares")
-    data = cursor.fetchall()
+    rows = cursor.fetchall()
+
+    lugares = [LugarModel.from_db(r).to_dict() for r in rows]
 
     conn.close()
-    return data
-
+    return lugares
 # ============================
 # POST - CREAR
 # ============================
