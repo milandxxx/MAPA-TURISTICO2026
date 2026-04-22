@@ -1,30 +1,36 @@
-<template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view/>
+﻿<template>
+  <div id='app'>
+    <header class='navbar'>
+      <h1>Mapa Turístico 2026</h1>
+
+      <nav>
+        <router-link to='/'>Inicio</router-link>
+        <router-link to='/mapa'>Mapa</router-link>
+        <router-link to='/login'>Login</router-link>
+        <router-link to='/admin'>Admin</router-link>
+      </nav>
+    </header>
+
+    <main class='content'>
+      <router-view />
+    </main>
+  </div>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script setup></script>
 
-nav {
-  padding: 30px;
+<style scoped>
+.navbar {
+  display:flex;
+  justify-content:space-between;
+  padding:15px;
+  background:#1f2937;
+  color:white;
 }
-
 nav a {
-  font-weight: bold;
-  color: #2c3e50;
+  color:white;
+  margin-left:10px;
+  text-decoration:none;
 }
-
-nav a.router-link-exact-active {
-  color: #42b983;
-}
+.content { padding:20px; }
 </style>
