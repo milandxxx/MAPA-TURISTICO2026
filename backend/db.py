@@ -5,5 +5,5 @@ def get_connection():
         host="localhost",
         user="root",
         password="santiagobd2026@",
-        database="mapa_turistico"
+        database="mapa_turistico2026"
     )
