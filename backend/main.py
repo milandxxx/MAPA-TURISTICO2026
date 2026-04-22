@@ -1,5 +1,6 @@
 from models import LugarModel
 from fastapi import FastAPI
+app = FastAPI( )
 @app.get("/lugares")
 def get_lugares():
     conn = get_connection()
