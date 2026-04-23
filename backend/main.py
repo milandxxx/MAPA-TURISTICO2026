@@ -1,4 +1,4 @@
-from models import LugarModel
+from models import Lugar
 from fastapi import FastAPI
 app = FastAPI( )
 @app.get("/lugares")
