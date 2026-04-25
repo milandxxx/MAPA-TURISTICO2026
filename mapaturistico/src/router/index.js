@@ -1,14 +1,14 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import Home from '../views/HomeView.vue'
-import Map from '../views/MapView.vue'
-import Login from '../views/LoginPage.vue'
-import Admin from '../views/AdminView.vue'
+import { createRouter, createWebHistory } from "vue-router"
+import HomeView from "../views/HomeView.vue"
+import MapView from "../views/MapView.vue"
+import LoginPage from "../views/LoginPage.vue"
+import AdminView from "../views/AdminView.vue"
 
 const routes = [
-  { path: '/', component: Home },
-  { path: '/map', component: Map },
-  { path: '/login', component: Login },
-  { path: '/admin', component: Admin }
+  { path: "/", component: HomeView },
+  { path: "/mapa", component: MapView },
+  { path: "/login", component: LoginPage },
+  { path: "/admin", component: AdminView }
 ]
 
 export default createRouter({

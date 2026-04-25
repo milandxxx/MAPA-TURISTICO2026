@@ -1,16 +1,15 @@
-import { createApp } from 'vue'
-import App from './App.vue'
-import router from './router'
-import PrimeVue from 'primevue/config'
+import { createApp } from "vue"
+import App from "./App.vue"
+import router from "./router"
 
-import 'primevue/resources/themes/saga-blue/theme.css'
-import 'primevue/resources/primevue.min.css'
-import 'primeicons/primeicons.css'
-import 'ol/ol.css'
+import PrimeVue from "primevue/config"
+import Skeleton from "primevue/skeleton"
+import "primevue/resources/themes/saga-blue/theme.css"
+import "primevue/resources/primevue.min.css"
+import "primeicons/primeicons.css"
 
 const app = createApp(App)
-
 app.use(router)
 app.use(PrimeVue)
-
-app.mount('#app')
+app.component("Skeleton", Skeleton)
+app.mount("#app")
