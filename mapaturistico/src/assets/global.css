@@ -1,0 +1,4 @@
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:Segoe UI; background:#f5f7fa; }
+button { background:#42b983; color:white; padding:10px; border:none; border-radius:8px; }
+input, textarea { width:100%; padding:8px; margin:5px 0; }

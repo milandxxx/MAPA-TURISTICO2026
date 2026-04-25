@@ -13,7 +13,7 @@ def get_lugares():
 
     conn.close()
     return lugares
-# ============================
+# ===========================
 # POST - CREAR
 # ============================
 @app.post("/lugares")
