@@ -4,8 +4,6 @@ from db import get_connection
 from models import Lugar
 
 app = FastAPI()
-
-# CORS (CLAVE PARA VUE)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -13,10 +11,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# =========================
-# GET TODOS
-# =========================
 @app.get("/lugares")
 def get_lugares():
     conn = get_connection()
@@ -29,11 +23,6 @@ def get_lugares():
 
     conn.close()
     return data
-
-
-# =========================
-# GET POR NOMBRE (BUSQUEDA)
-# =========================
 @app.get("/lugares/buscar")
 def buscar_lugares(nombre: str):
     conn = get_connection()
@@ -47,11 +36,6 @@ def buscar_lugares(nombre: str):
     data = cursor.fetchall()
     conn.close()
     return data
-
-
-# =========================
-# CREAR
-# =========================
 @app.post("/lugares")
 def crear_lugar(lugar: Lugar):
     conn = get_connection()
@@ -66,11 +50,6 @@ def crear_lugar(lugar: Lugar):
     conn.close()
 
     return {"msg": "Lugar creado"}
-
-
-# =========================
-# ACTUALIZAR
-# =========================
 @app.put("/lugares/{id}")
 def actualizar_lugar(id: int, lugar: Lugar):
     conn = get_connection()
@@ -86,11 +65,6 @@ def actualizar_lugar(id: int, lugar: Lugar):
     conn.close()
 
     return {"msg": "Lugar actualizado"}
-
-
-# =========================
-# ELIMINAR
-# =========================
 @app.delete("/lugares/{id}")
 def eliminar_lugar(id: int):
     conn = get_connection()
