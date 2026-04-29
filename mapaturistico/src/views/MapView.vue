@@ -1,4 +1,5 @@
 <template>
+<<<<<<< Updated upstream
   <div class="map-container">
 
     <SearchBox @buscar="buscarLugar" />
@@ -36,10 +37,37 @@
       </div>
     </div>
 
+=======
+  <div class="container">
+    <div class="sidebar" :class="{ open: sidebarOpen }">
+      <SearchBox @buscar="buscarLugar" />
+      <p v-if="filtrados.length === 0">Sin resultados</p>
+      <div
+        class="item"
+        v-for="l in filtrados"
+        :key="l.id"
+        @click="seleccionarDesdeLista(l)"
+      >
+        <h4>{{ l.nombre }}</h4>
+        <p>{{ l.descripcion }}</p>
+      </div>
+    </div>
+    <button class="toggle" @click="sidebarOpen = !sidebarOpen">
+      ☰
+    </button>
+    <div id="map" class="map"></div>
+    <div class="popup" v-show="seleccionado">
+      <img :src="seleccionado?.imagen" class="img" />
+      <h3>{{ seleccionado?.nombre }}</h3>
+      <p>{{ seleccionado?.descripcion }}</p>
+      <button @click="trazarRuta">Ir</button>
+      <button @click="cerrar">Cerrar</button>
+    </div>
+>>>>>>> Stashed changes
   </div>
 </template>
-
 <script>
+<<<<<<< Updated upstream
 import api from "../services/api";
 import SearchBox from "../components/SearchBox.vue";
 
@@ -162,10 +190,134 @@ export default {
         this.comentarios.push(this.comentario);
         this.comentario = "";
       }
+=======
+import SearchBox from '../components/SearchBox.vue'
+import api from '../services/api'
+
+import Map from 'ol/Map'
+import View from 'ol/View'
+import TileLayer from 'ol/layer/Tile'
+import OSM from 'ol/source/OSM'
+import VectorSource from 'ol/source/Vector'
+import VectorLayer from 'ol/layer/Vector'
+import Feature from 'ol/Feature'
+import Point from 'ol/geom/Point'
+import LineString from 'ol/geom/LineString'
+import { fromLonLat } from 'ol/proj'
+import { Style, Stroke } from 'ol/style'
+export default {
+  components: { SearchBox },
+  data() {
+    return {
+      map: null,
+      vector: null,
+      lugares: [],
+      filtrados: [],
+      seleccionado: null,
+      sidebarOpen: true,
+      userCoords: null
+    }
+  },
+  async mounted() {
+    this.initMap()
+    await this.cargar()
+    this.filtrados = this.lugares
+    this.getUserLocation()
+  },
+  methods: {
+    initMap() {
+      this.vector = new VectorSource()
+      const layer = new VectorLayer({
+        source: this.vector
+      })
+      this.map = new Map({
+        target: 'map',
+        layers: [
+          new TileLayer({ source: new OSM() }),
+          layer
+        ],
+        view: new View({
+          center: fromLonLat([-74.1990, 11.2408]), // Santa Marta
+          zoom: 13
+        })
+      })
+      this.map.on('click', evt => {
+        this.map.forEachFeatureAtPixel(evt.pixel, f => {
+          this.seleccionado = f.get('data')
+        })
+      })
+    },
+    async cargar() {
+      const res = await api.get('/lugares')
+      this.lugares = res.data
+      this.pintar(this.lugares)
+    },
+    pintar(lista) {
+      this.vector.clear()
+      lista.forEach(l => {
+        if (!l.lat || !l.lng) return
+        const f = new Feature({
+          geometry: new Point(fromLonLat([l.lng, l.lat]))
+        })
+        f.set('data', l)
+        this.vector.addFeature(f)
+      })
+    },
+    buscarLugar(texto) {
+      this.filtrados = this.lugares.filter(l =>
+        l.nombre.toLowerCase().includes(texto.toLowerCase())
+      )
+      this.pintar(this.filtrados)
+      if (this.filtrados.length > 0) {
+        const l = this.filtrados[0]
+        this.map.getView().animate({
+          center: fromLonLat([l.lng, l.lat]),
+          zoom: 15,
+          duration: 800
+        })
+      }
+    },
+    seleccionarDesdeLista(l) {
+      this.seleccionado = l
+
+      this.map.getView().animate({
+        center: fromLonLat([l.lng, l.lat]),
+        zoom: 15
+      })
+    },
+    getUserLocation() {
+      navigator.geolocation.getCurrentPosition(pos => {
+        this.userCoords = [
+          pos.coords.longitude,
+          pos.coords.latitude
+        ]
+      })
+    },
+    trazarRuta() {
+      if (!this.userCoords || !this.seleccionado) return
+      const coords = [
+        fromLonLat(this.userCoords),
+        fromLonLat([this.seleccionado.lng, this.seleccionado.lat])
+      ]
+      const line = new Feature({
+        geometry: new LineString(coords)
+      })
+      line.setStyle(new Style({
+        stroke: new Stroke({
+          color: 'blue',
+          width: 3
+        })
+      }))
+      this.vector.addFeature(line)
+    },
+    cerrar() {
+      this.seleccionado = null
+>>>>>>> Stashed changes
     }
   }
 };
 </script>
+<<<<<<< Updated upstream
 
 <style scoped>
 .map-container {
@@ -241,5 +393,54 @@ export default {
 @keyframes slideUp {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
+=======
+<style scoped>
+.container {
+  display: flex;
+}
+.sidebar {
+  width: 300px;
+  background: white;
+  height: 100vh;
+  overflow: auto;
+  transform: translateX(-100%);
+  transition: 0.3s;
+  position: absolute;
+  z-index: 10;
+}
+.sidebar.open {
+  transform: translateX(0);
+}
+.item {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+}
+.item:hover {
+  background: #f0f0f0;
+}
+.toggle {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 20;
+}
+.map {
+  width: 100%;
+  height: 100vh;
+}
+.popup {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  width: 250px;
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+}
+.img {
+  width: 100%;
+  border-radius: 8px;
+>>>>>>> Stashed changes
 }
 </style>
