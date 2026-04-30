@@ -1,5 +1,5 @@
-fastap
-uvicorn
+fastapi 
+uvicorn 
+sqlalchemy 
+pymysql 
 pydantic
-mysql-connector-python
-python-dotenv
