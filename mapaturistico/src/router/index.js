@@ -1,29 +1,47 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-import Home from '../views/HomeView.vue'
-import Login from '../views/LoginPage.vue'
-import Admin from '../views/AdminView.vue'
+import HomeView from '../views/public/HomeView.vue'
+import MapaView from '../views/public/MapaView.vue'
+import LoginView from '../views/admin/LoginView.vue'
+import AdminPanelView from '../views/admin/AdminPanelView.vue'
 
 const routes = [
-  { path: '/', component: Home },
-  { path: '/login', component: Login },
-  { path: '/admin', component: Admin }
+  {
+    path:'/',
+    component:HomeView
+  },
+  {
+    path:'/mapa/:id',
+    component:MapaView
+  },
+  {
+    path:'/login',
+    component:LoginView
+  },
+  {
+    path:'/admin',
+    component:AdminPanelView,
+    meta:{
+      requiresAuth:true
+    }
+  }
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history:createWebHistory(),
   routes
 })
 
-/* 🔐 GUARD GLOBAL */
-router.beforeEach((to, from, next) => {
-  const isAuth = localStorage.getItem('auth') === 'true'
+router.beforeEach((to,from,next)=>{
 
-  if (to.path.startsWith('/admin') && !isAuth) {
+  const token = localStorage.getItem('token')
+
+  if(to.meta.requiresAuth && !token){
     next('/login')
-  } else {
+  }else{
     next()
   }
+
 })
 
 export default router
