@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-import HomeView from '../views/public/HomeView.vue'
-import MapaView from '../views/public/MapaView.vue'
-import LoginView from '../views/admin/LoginView.vue'
-import AdminPanelView from '../views/admin/AdminPanelView.vue'
+import HomeView from '../viewsHomeView.vue'
+import MapaView from '../views/MapaView.vue'
+import LoginView from '../views/LoginView.vue'
+import AdminPanelView from '../views/AdminPanelView.vue'
 
 const routes = [
   {
