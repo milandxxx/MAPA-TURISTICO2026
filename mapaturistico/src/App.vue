@@ -1,18 +1,36 @@
 <template>
-  <router-view />
+
+<router-view />
+
 </template>
 
 <script>
+
 export default {
-  name: "App"
+
+    name:'App'
+
 }
+
 </script>
 
 <style>
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  margin: 0;
-  background: #f4f6f9;
-  color: #333;
+
+html,
+body,
+#app{
+
+    width:100%;
+    height:100%;
+    margin:0;
+    padding:0;
+
 }
+
+*{
+
+    box-sizing:border-box;
+
+}
+
 </style>
