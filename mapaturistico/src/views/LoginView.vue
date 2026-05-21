@@ -1,25 +1,24 @@
 <template>
 
-<div class="login-page">
+<div class="login-container">
 
-    <div class="background"></div>
-
-    <div class="card">
+    <div class="login-box">
 
         <h1>Admin Login</h1>
 
         <input
-            v-model="usuario"
+            v-model="username"
+            type="text"
             placeholder="Usuario"
-        />
+        >
 
         <input
-            type="password"
             v-model="password"
+            type="password"
             placeholder="Contraseña"
-        />
+        >
 
-        <button @click="ingresar">
+        <button @click="login">
             Ingresar
         </button>
 
@@ -31,46 +30,59 @@
 
 <script>
 
-import { login } from '../../services/authService'
+import authService from "../services/authService";
 
 export default {
 
-data(){
+    name:"LoginView",
 
-    return{
+    data(){
 
-        usuario:'',
-        password:''
+        return{
+
+            username:"",
+            password:""
+
+        }
+
+    },
+
+    methods:{
+
+        async login(){
+
+            try{
+
+                const response = await authService.login({
+
+                    username:this.username,
+                    password:this.password
+
+                })
+
+                console.log(response.data)
+
+                localStorage.setItem(
+                    "token",
+                    "logueado"
+                )
+
+                alert("Login correcto")
+
+                this.$router.push("/admin")
+
+            }
+            catch(error){
+
+                console.log(error)
+
+                alert("Credenciales incorrectas")
+
+            }
+
+        }
 
     }
-
-},
-
-methods:{
-
-    ingresar(){
-
-        login({
-
-            usuario:this.usuario,
-            password:this.password
-
-        })
-
-        .then((response)=>{
-
-            localStorage.setItem(
-                'token',
-                response.data.token
-            )
-
-            this.$router.push('/admin')
-
-        })
-
-    }
-
-}
 
 }
 
@@ -78,7 +90,7 @@ methods:{
 
 <style scoped>
 
-.login-page{
+.login-container{
 
     width:100%;
     height:100vh;
@@ -88,152 +100,59 @@ methods:{
     justify-content:center;
     align-items:center;
 
-    overflow:hidden;
-
-    position:relative;
-
-    background:#0f172a;
+    background:#f3f4f6;
 
 }
 
-.background{
+.login-box{
 
-    position:absolute;
+    width:350px;
 
-    width:200%;
-    height:200%;
+    background:white;
 
-    background:
+    padding:30px;
 
-    radial-gradient(circle,#00cec9 2px,transparent 2px);
-
-    background-size:50px 50px;
-
-    animation:mover 15s linear infinite;
-
-    opacity:0.25;
-
-}
-
-.card{
-
-    position:relative;
-
-    z-index:10;
-
-    width:400px;
-
-    padding:40px;
-
-    border-radius:25px;
-
-    background:rgba(255,255,255,0.08);
-
-    backdrop-filter:blur(15px);
-
-    border:1px solid rgba(255,255,255,0.15);
+    border-radius:20px;
 
     display:flex;
 
     flex-direction:column;
 
-    gap:20px;
+    gap:15px;
 
-    animation:subir 1s ease;
+    box-shadow:0 10px 30px rgba(0,0,0,0.1);
 
 }
 
-.card h1{
-
-    color:white;
+h1{
 
     text-align:center;
 
-    margin-bottom:10px;
+}
+
+input{
+
+    padding:12px;
+
+    border:1px solid #ccc;
+
+    border-radius:10px;
 
 }
 
-.card input{
+button{
 
-    padding:16px;
+    padding:12px;
 
     border:none;
 
-    border-radius:15px;
+    border-radius:10px;
 
-    outline:none;
-
-    background:rgba(255,255,255,0.15);
+    background:#2563eb;
 
     color:white;
-
-    font-size:16px;
-
-}
-
-.card input::placeholder{
-
-    color:#dfe6e9;
-
-}
-
-.card button{
-
-    padding:16px;
-
-    border:none;
-
-    border-radius:15px;
-
-    background:#00b894;
-
-    color:white;
-
-    font-size:17px;
 
     cursor:pointer;
-
-    transition:0.3s;
-
-}
-
-.card button:hover{
-
-    transform:scale(1.03);
-
-}
-
-@keyframes mover{
-
-    from{
-
-        transform:translate(0,0);
-
-    }
-
-    to{
-
-        transform:translate(-200px,-200px);
-
-    }
-
-}
-
-@keyframes subir{
-
-    from{
-
-        opacity:0;
-        transform:translateY(50px);
-
-    }
-
-    to{
-
-        opacity:1;
-        transform:translateY(0);
-
-    }
 
 }
 

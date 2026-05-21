@@ -1,47 +1,36 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from "vue-router";
 
-import HomeView from '../viewsHomeView.vue'
-import MapaView from '../views/MapaView.vue'
-import LoginView from '../views/LoginView.vue'
-import AdminPanelView from '../views/AdminPanelView.vue'
+import HomeView from "../views/HomeView.vue";
+import MapView from "../views/MapaView.vue";
+import AdminView from "../views/AdminPanelView.vue";
+import LoginView from "../views/LoginView.vue";
 
 const routes = [
   {
-    path:'/',
-    component:HomeView
+    path: "/",
+    name: "home",
+    component: HomeView,
   },
   {
-    path:'/mapa/:id',
-    component:MapaView
+    path: "/mapa",
+    name: "mapa",
+    component: MapView,
   },
   {
-    path:'/login',
-    component:LoginView
+    path: "/admin",
+    name: "admin",
+    component: AdminView,
   },
   {
-    path:'/admin',
-    component:AdminPanelView,
-    meta:{
-      requiresAuth:true
-    }
-  }
-]
+    path: "/login",
+    name: "login",
+    component: LoginView,
+  },
+];
 
 const router = createRouter({
-  history:createWebHistory(),
-  routes
-})
+  history: createWebHistory(),
+  routes,
+});
 
-router.beforeEach((to,from,next)=>{
-
-  const token = localStorage.getItem('token')
-
-  if(to.meta.requiresAuth && !token){
-    next('/login')
-  }else{
-    next()
-  }
-
-})
-
-export default router
+export default router;
