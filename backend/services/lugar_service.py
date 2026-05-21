@@ -1,23 +1,59 @@
-from sqlalchemy.orm import Session
 from models.lugar_model import Lugar
-from schemas.lugar_schema import LugarCreate
 
-def get_lugares(db: Session):
+# LISTAR
+def get_lugares(db):
     return db.query(Lugar).all()
 
-def get_lugar(db: Session, lugar_id: int):
-    return db.query(Lugar).filter(Lugar.id == lugar_id).first()
+# BUSCAR
+def buscar_lugar(nombre, db):
+    return db.query(Lugar).filter(
+        Lugar.nombre.ilike(f"%{nombre}%")
+    ).all()
 
-def create_lugar(db: Session, lugar: LugarCreate):
-    db_lugar = Lugar(**lugar.model_dump())
-    db.add(db_lugar)
+# CREAR
+def crear_lugar(lugar, db):
+    nuevo = Lugar(
+        nombre=lugar.nombre,
+        descripcion=lugar.descripcion,
+        imagen=lugar.imagen,
+        latitud=lugar.latitud,
+        longitud=lugar.longitud,
+        abierto=lugar.abierto
+    )
+
+    db.add(nuevo)
     db.commit()
-    db.refresh(db_lugar)
-    return db_lugar
+    db.refresh(nuevo)
 
-def delete_lugar(db: Session, lugar_id: int):
-    lugar = get_lugar(db, lugar_id)
-    if lugar:
-        db.delete(lugar)
-        db.commit()
-    return lugar
+    return nuevo
+
+# EDITAR
+def editar_lugar(id, lugar, db):
+    lugar_db = db.query(Lugar).filter(Lugar.id == id).first()
+
+    if not lugar_db:
+        return None
+
+    lugar_db.nombre = lugar.nombre
+    lugar_db.descripcion = lugar.descripcion
+    lugar_db.imagen = lugar.imagen
+    lugar_db.latitud = lugar.latitud
+    lugar_db.longitud = lugar.longitud
+    lugar_db.abierto = lugar.abierto
+
+    db.commit()
+    db.refresh(lugar_db)
+
+    return lugar_db
+
+# ELIMINAR
+def eliminar_lugar(id, db):
+    lugar_db = db.query(Lugar).filter(Lugar.id == id).first()
+
+    if not lugar_db:
+        return None
+
+    db.delete(lugar_db)
+    db.commit()
+
+    return True
